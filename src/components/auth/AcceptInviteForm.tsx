@@ -155,7 +155,7 @@ export default function AcceptInviteForm() {
       }
 
       // Redirect to dashboard
-      // router.push('/dashboard');
+      router.push('/');
     } catch (err: unknown) {
       console.error('Error setting up account:', err);
       setError(err instanceof Error ? err.message : 'Failed to set up account');
