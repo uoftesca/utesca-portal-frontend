@@ -17,7 +17,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import AcceptInviteForm from '@/components/AcceptInviteForm';
+import AcceptInviteForm from '@/components/auth/AcceptInviteForm';
 import {
   Card,
   CardContent,
