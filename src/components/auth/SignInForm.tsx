@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircleIcon } from 'lucide-react';
 
 export function SignInForm() {
   const [email, setEmail] = useState('');
@@ -29,21 +30,42 @@ export function SignInForm() {
     setLoading(true);
 
     try {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      // Call backend API
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/sign-in`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
-      if (signInError) {
-        setError(signInError.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage =
+          typeof data.detail === 'string'
+            ? data.detail
+            : 'Invalid email or password';
+        setError(errorMessage);
         return;
       }
 
-      if (data.session) {
-        router.push('/');
-        router.refresh();
+      // Set session in Supabase client for automatic token refresh
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      });
+
+      if (sessionError) {
+        setError(sessionError.message);
+        return;
       }
+
+      router.push('/');
+      router.refresh();
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       console.error('Sign in error:', err);
@@ -66,6 +88,7 @@ export function SignInForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
+              <AlertCircleIcon />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
