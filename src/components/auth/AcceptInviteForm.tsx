@@ -135,7 +135,7 @@ export default function AcceptInviteForm() {
 
       // Call backend to complete onboarding (sets password + creates user record)
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/complete-onboarding`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/complete-onboarding`,
         {
           method: 'POST',
           headers: {

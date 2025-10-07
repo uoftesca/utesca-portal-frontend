@@ -32,7 +32,7 @@ export function SignInForm() {
     try {
       // Call backend API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/sign-in`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`,
         {
           method: 'POST',
           headers: {
