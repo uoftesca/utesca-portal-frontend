@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'UTESCA Portal',
   description: 'UTESCA Internal Members Portal',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
