@@ -6,14 +6,7 @@ import { createClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface User {
-  email: string;
-  user_metadata?: {
-    first_name?: string;
-    last_name?: string;
-  };
-}
+import { User } from '@supabase/supabase-js';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
