@@ -82,4 +82,28 @@ export const apiClient = {
   getCurrentUser: async () => {
     return apiRequest('/auth/me');
   },
+
+  // Users
+  getUsers: async (params?: {
+    department_id?: string;
+    role?: string;
+    year?: number;
+    search?: string;
+    page?: number;
+    page_size?: number;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.department_id) query.append('department_id', params.department_id);
+    if (params?.role) query.append('role', params.role);
+    if (params?.year) query.append('year', params.year.toString());
+    if (params?.search) query.append('search', params.search);
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.page_size) query.append('page_size', params.page_size.toString());
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return apiRequest(`/users${queryString}`);
+  },
+
+  getUserById: async (userId: string) => {
+    return apiRequest(`/users/${userId}`);
+  },
 };

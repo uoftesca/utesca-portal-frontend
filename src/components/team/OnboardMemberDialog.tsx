@@ -28,13 +28,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { apiClient } from '@/lib/api-client';
-import type { Department, InviteUserRequest, UserRole } from '@/types/team';
+import type { Department, DepartmentListResponse, InviteUserRequest, UserRole } from '@/types/team';
 
 interface OnboardMemberDialogProps {
   onSuccess?: () => void;
 }
 
-export function OnboardMemberDialog({ onSuccess }: OnboardMemberDialogProps) {
+export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogProps>) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -57,7 +57,7 @@ export function OnboardMemberDialog({ onSuccess }: OnboardMemberDialogProps) {
 
   const loadDepartments = async () => {
     try {
-      const response: any = await apiClient.getDepartments({ all: false });
+      const response = await apiClient.getDepartments({ all: false }) as DepartmentListResponse;
       setDepartments(response.departments || []);
     } catch (err) {
       console.error('Failed to load departments:', err);
@@ -85,8 +85,9 @@ export function OnboardMemberDialog({ onSuccess }: OnboardMemberDialogProps) {
 
       setOpen(false);
       onSuccess?.();
-    } catch (err: any) {
-      setError(err.message || 'Failed to invite user');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to invite user';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -105,8 +106,8 @@ export function OnboardMemberDialog({ onSuccess }: OnboardMemberDialogProps) {
           <DialogHeader>
             <DialogTitle>Onboard New Member</DialogTitle>
             <DialogDescription>
-              Invite a new team member to the UTESCA Portal. They will receive
-              an email invitation to set their password.
+              Invite a new team member to the UTESCA Portal.
+              They will receive an email invitation to set their password.
             </DialogDescription>
           </DialogHeader>
 
@@ -208,7 +209,6 @@ export function OnboardMemberDialog({ onSuccess }: OnboardMemberDialogProps) {
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Department</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}

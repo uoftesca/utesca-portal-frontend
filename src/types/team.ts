@@ -54,3 +54,10 @@ export interface InviteUserResponse {
   message: string;
   email: string;
 }
+
+export interface UserListResponse {
+  total: number;
+  users: User[];
+  page: number | null;
+  page_size: number | null;
+}

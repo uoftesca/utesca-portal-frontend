@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -25,67 +25,40 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
-import type { User, Department, DepartmentListResponse, YearsResponse } from '@/types/team';
-
-// Mock data for now - will be replaced with API call
-const mockUsers: User[] = [
-  {
-    id: '1',
-    user_id: '1',
-    email: 'sarah.johnson@example.com',
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    role: 'co_president',
-    display_role: 'President',
-    department_id: null,
-    preferred_name: null,
-    photo_url: null,
-    invited_by: null,
-    announcement_email_preference: 'all',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    user_id: '2',
-    email: 'michael.chen@example.com',
-    first_name: 'Michael',
-    last_name: 'Chen',
-    role: 'co_president',
-    display_role: 'Vice President',
-    department_id: null,
-    preferred_name: null,
-    photo_url: null,
-    invited_by: null,
-    announcement_email_preference: 'all',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-];
+import type { User, Department, DepartmentListResponse, YearsResponse, UserListResponse } from '@/types/team';
 
 interface TeamMembersTableProps {
   refreshTrigger?: number;
 }
 
-export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
+export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTableProps>) {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [years, setYears] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
 
-  useEffect(() => {
-    loadData();
-  }, [refreshTrigger]);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  const loadData = async () => {
-    setLoading(true);
+  useEffect(() => {
+    loadDepartmentsAndYears();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, selectedYear, selectedDepartment, searchQuery, currentPage]);
+
+  const loadDepartmentsAndYears = async () => {
     try {
-      // Load departments and years
       const [deptResponse, yearsResponse] = await Promise.all([
         apiClient.getDepartments({ all: true }),
         apiClient.getAvailableYears(),
@@ -93,11 +66,50 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
 
       setDepartments(deptResponse.departments || []);
       setYears(yearsResponse.years || []);
-
-      // TODO: Replace with actual API call when users endpoint is ready
-      setUsers(mockUsers);
     } catch (err) {
-      console.error('Failed to load data:', err);
+      console.error('Failed to load departments and years:', err);
+    }
+  };
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const params: {
+        department_id?: string;
+        year?: number;
+        search?: string;
+        page: number;
+        page_size: number;
+      } = {
+        page: currentPage,
+        page_size: pageSize,
+      };
+
+      if (selectedDepartment !== 'all') {
+        if (selectedDepartment === 'none') {
+          // Handle "Executive Board" (no department) filter
+          // This would require backend support - for now skip
+        } else {
+          params.department_id = selectedDepartment;
+        }
+      }
+
+      if (selectedYear !== 'all') {
+        params.year = Number.parseInt(selectedYear, 10);
+      }
+
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+
+      const response = await apiClient.getUsers(params) as UserListResponse;
+
+      setUsers(response.users || []);
+      setTotal(response.total || 0);
+    } catch (err) {
+      console.error('Failed to load users:', err);
+      setUsers([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -119,36 +131,15 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'co_president':
-        return 'Admin';
+        return 'Co-President';
       case 'vp':
-        return 'Editor';
+        return 'VP';
       case 'director':
-        return 'Contributor';
+        return 'Director';
       default:
         return role;
     }
   };
-
-  const filteredUsers = users.filter((user) => {
-    // Search filter
-    const matchesSearch =
-      searchQuery === '' ||
-      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.display_role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Year filter - TODO: implement when user.year is available
-    const matchesYear = selectedYear === 'all';
-
-    // Department filter
-    const matchesDepartment =
-      selectedDepartment === 'all' ||
-      (selectedDepartment === 'none' && !user.department_id) ||
-      user.department_id === selectedDepartment;
-
-    return matchesSearch && matchesYear && matchesDepartment;
-  });
 
   const getDepartmentName = (departmentId: string | null) => {
     if (!departmentId) return 'No Department';
@@ -156,7 +147,37 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
     return dept?.name || 'Unknown';
   };
 
-  if (loading) {
+  const totalPages = Math.ceil(total / pageSize);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Reset to page 1 when filters change
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleYearChange = (value: string) => {
+    setSelectedYear(value);
+    setCurrentPage(1);
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setSelectedDepartment(value);
+    setCurrentPage(1);
+  };
+
+  if (loading && users.length === 0) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
@@ -174,11 +195,11 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
           <Input
             placeholder="Search members..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"
           />
         </div>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
+        <Select value={selectedYear} onValueChange={handleYearChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="All Years" />
           </SelectTrigger>
@@ -191,7 +212,7 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+        <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Departments" />
           </SelectTrigger>
@@ -202,7 +223,6 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
                 {dept.name}
               </SelectItem>
             ))}
-            <SelectItem value="none">No Department</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -220,37 +240,71 @@ export function TeamMembersTable({ refreshTrigger }: TeamMembersTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? (
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  <div className="flex justify-center">
+                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading && users.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No members found matching your filters
                 </TableCell>
               </TableRow>
-            ) : (
-              filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    {user.first_name} {user.last_name}
-                  </TableCell>
-                  <TableCell>{user.display_role}</TableCell>
-                  <TableCell>{getDepartmentName(user.department_id)}</TableCell>
-                  <TableCell>
-                    <Badge variant={getRoleBadgeVariant(user.role)}>
-                      {getRoleLabel(user.role)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">2024</TableCell>
-                </TableRow>
-              ))
             )}
+            {!loading && users.length > 0 && users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell className="font-medium">
+                  {user.preferred_name || `${user.first_name} ${user.last_name}`}
+                </TableCell>
+                <TableCell>{user.display_role}</TableCell>
+                <TableCell>{getDepartmentName(user.department_id)}</TableCell>
+                <TableCell>
+                  <Badge variant={getRoleBadgeVariant(user.role)}>
+                    {getRoleLabel(user.role)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">2024</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
 
-      {/* Footer */}
-      <p className="text-sm text-muted-foreground">
-        Showing {filteredUsers.length} of {users.length} members
-      </p>
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing {users.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{' '}
+          {Math.min(currentPage * pageSize, total)} of {total} members
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1 || loading}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages || loading}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
