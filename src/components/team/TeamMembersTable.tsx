@@ -147,6 +147,12 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
     return dept?.name || 'Unknown';
   };
 
+  const getDepartmentYear = (departmentId: string | null) => {
+    if (!departmentId) return '-';
+    const dept = departments.find((d) => d.id === departmentId);
+    return dept?.year?.toString() || '-';
+  };
+
   const totalPages = Math.ceil(total / pageSize);
 
   const handlePreviousPage = () => {
@@ -268,7 +274,7 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
                     {getRoleLabel(user.role)}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">2024</TableCell>
+                <TableCell className="text-right">{getDepartmentYear(user.department_id)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
