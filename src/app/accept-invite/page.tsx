@@ -29,7 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AcceptInvitePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-accent to-[#2A3441] px-4">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader className="text-center space-y-2">
