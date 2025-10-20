@@ -52,6 +52,9 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
   useEffect(() => {
     if (open) {
       loadDepartments();
+    } else {
+      // Clear errors when dialog closes
+      setError(null);
     }
   }, [open]);
 
@@ -67,8 +70,15 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    // Check if department is selected (Select component doesn't support required attribute)
+    if (!formData.department_id) {
+      setError('Please select a department');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       await apiClient.inviteUser(formData);
@@ -198,7 +208,7 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="department">Department (Optional)</Label>
+              <Label htmlFor="department">Department</Label>
               <Select
                 value={formData.department_id}
                 onValueChange={(value) =>
