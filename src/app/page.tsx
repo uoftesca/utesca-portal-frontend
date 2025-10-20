@@ -6,12 +6,21 @@ import { createClient } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { TeamManagementDashboard } from '@/components/team';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { User } from '@supabase/supabase-js';
 import {
   Sidebar,
@@ -129,16 +138,7 @@ export default function DashboardPage() {
         );
       case 'team-management':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Team management content will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
+          <TeamManagementDashboard userRole={user?.user_metadata?.role} />
         );
       case 'applications':
         return (
@@ -309,11 +309,34 @@ export default function DashboardPage() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
-          <h1 className="text-xl font-semibold">
-            {menuItems.find((item) => item.id === activeTab)?.label || 'Dashboard'}
-          </h1>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('dashboard');
+                  }}
+                  className="cursor-pointer hover:text-foreground"
+                >
+                  Dashboard
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {activeTab !== 'dashboard' && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      {menuItems.find((item) => item.id === activeTab)?.label}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 p-8">
           {renderTabContent()}
         </div>
       </SidebarInset>
