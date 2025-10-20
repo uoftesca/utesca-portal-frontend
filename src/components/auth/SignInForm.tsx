@@ -76,12 +76,12 @@ export function SignInForm() {
 
   return (
     <Card className="w-full max-w-md shadow-lg">
-      <CardHeader className="space-y-1">
+      <CardHeader className="space-y-1 text-center">
         <CardTitle className="text-2xl font-bold tracking-tight">
           UTESCA Portal
         </CardTitle>
         <CardDescription>
-          Sign in to access the internal members portal
+          University of Toronto Engineering Students Consulting Association
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -119,11 +119,27 @@ export function SignInForm() {
               disabled={loading}
               autoComplete="current-password"
             />
+            <div className="text-right">
+              <span
+                className="text-sm text-primary cursor-pointer hover:underline"
+                onClick={() => {
+                  // TODO: Implement forgot password flow
+                  // Call backend endpoint: POST /auth/forgot-password with email
+                  console.log('Forgot password clicked');
+                }}
+              >
+                Forgot password?
+              </span>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
+
+          <p className="text-sm text-muted-foreground text-center">
+            Contact your administrator if you need access.
+          </p>
         </form>
       </CardContent>
     </Card>
