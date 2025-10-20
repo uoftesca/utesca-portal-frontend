@@ -38,7 +38,6 @@ import {
 } from '@/components/ui/sidebar';
 import {
   Home,
-  FileCheck,
   Calendar,
   Users,
   FileText,
