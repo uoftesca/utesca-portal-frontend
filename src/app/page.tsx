@@ -53,7 +53,6 @@ const menuItems: MenuItem[] = [
   { id: 'announcements', label: 'Announcements', icon: Bell },
   { id: 'all-events', label: 'All Events', icon: Calendar },
   { id: 'team-management', label: 'Team Management', icon: Users },
-  { id: 'pending-approvals', label: 'Pending Approvals', icon: FileCheck },
   { id: 'photos', label: 'Photos', icon: Image },
   { id: 'applications', label: 'Applications', icon: FileText },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -112,19 +111,6 @@ export default function DashboardPage() {
                   </p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        );
-      case 'pending-approvals':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Approvals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Pending approvals content will be displayed here.
-              </p>
             </CardContent>
           </Card>
         );
@@ -257,9 +243,7 @@ export default function DashboardPage() {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="p-4">
-            <h2 className="text-lg font-bold">UTESCA Portal</h2>
-          </div>
+          <h2 className="text-lg font-bold px-2 py-4">UTESCA Portal</h2>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -272,14 +256,6 @@ export default function DashboardPage() {
                       <SidebarMenuButton
                         onClick={() => setActiveTab(item.id)}
                         isActive={activeTab === item.id}
-                        className={`
-                          h-9
-                          ${
-                            activeTab === item.id
-                              ? 'bg-[darkred] text-white hover:bg-[darkred]/90'
-                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                          }
-                        `}
                       >
                         <Icon className="h-5 w-5" />
                         <span className="text-xs font-medium">{item.label}</span>
@@ -291,12 +267,12 @@ export default function DashboardPage() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="border-t border-gray-800">
+        <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton className="h-auto p-2">
                     <Avatar className="h-8 w-8 bg-blue-700">
                       <AvatarFallback className="bg-blue-700 text-white text-xs">
                         {user?.user_metadata?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
@@ -317,7 +293,8 @@ export default function DashboardPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   side="top"
-                  className="w-[--radix-popper-anchor-width]"
+                  className="min-w-0"
+                  style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }}
                 >
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4" />
