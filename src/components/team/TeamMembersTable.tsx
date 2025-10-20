@@ -265,7 +265,7 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
             {!loading && users.length > 0 && users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
-                  {user.preferred_name || `${user.first_name} ${user.last_name}`}
+                  {user.preferred_name ? `${user.preferred_name} ${user.last_name}` : `${user.first_name} ${user.last_name}`}
                 </TableCell>
                 <TableCell>{user.display_role}</TableCell>
                 <TableCell>{getDepartmentName(user.department_id)}</TableCell>
