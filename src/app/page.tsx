@@ -51,7 +51,7 @@ type MenuItem = {
 const menuItems: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'announcements', label: 'Announcements', icon: Bell },
-  { id: 'all-events', label: 'All Events', icon: Calendar },
+  { id: 'events', label: 'Events', icon: Calendar },
   { id: 'team-management', label: 'Team Management', icon: Users },
   { id: 'photos', label: 'Photos', icon: Image },
   { id: 'applications', label: 'Applications', icon: FileText },
@@ -114,7 +114,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         );
-      case 'all-events':
+      case 'events':
         return (
           <Card>
             <CardHeader>
