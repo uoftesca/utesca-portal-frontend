@@ -154,8 +154,8 @@ export default function AcceptInviteForm() {
         throw new Error(errorData.detail || 'Failed to complete onboarding');
       }
 
-      // Redirect to dashboard
-      router.push('/');
+      // Redirect to sign in page
+      router.push('/sign-in');
     } catch (err: unknown) {
       console.error('Error setting up account:', err);
       setError(err instanceof Error ? err.message : 'Failed to set up account');
