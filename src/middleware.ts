@@ -30,11 +30,13 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/sign-in') ||
-                     request.nextUrl.pathname.startsWith('/accept-invite')
+  const isSignInPage = request.nextUrl.pathname.startsWith('/sign-in')
+  const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/accept-invite')
+  const isAuthPage = isSignInPage || isAcceptInvitePage
 
-  // Redirect to home if authenticated and on auth page
-  if (session && isAuthPage) {
+  // Redirect to home if authenticated and on sign-in page
+  // (but allow access to accept-invite page even if authenticated)
+  if (session && isSignInPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

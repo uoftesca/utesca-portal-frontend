@@ -22,6 +22,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { User } from '@supabase/supabase-js';
+import { UserProfile } from '@/types/user';
 import {
   Sidebar,
   SidebarContent,
@@ -70,6 +71,7 @@ const menuItems: MenuItem[] = [
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const router = useRouter();
@@ -77,11 +79,38 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        // Get auth user
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setUser(user);
+
+        // Fetch complete user profile from backend
+        if (user) {
+          const { data: { session } } = await supabase.auth.getSession();
+
+          if (session?.access_token) {
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+              {
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              const profile = await response.json();
+              setUserProfile(profile);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUser();
@@ -106,17 +135,25 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground">
                   Signed in as:{' '}
                   <span className="font-medium text-foreground">
-                    {user?.email}
+                    {userProfile?.email || user?.email}
                   </span>
                 </p>
-                {user?.user_metadata?.first_name && (
-                  <p className="text-sm text-muted-foreground">
-                    Name:{' '}
-                    <span className="font-medium text-foreground">
-                      {user.user_metadata.first_name}{' '}
-                      {user.user_metadata.last_name}
-                    </span>
-                  </p>
+                {userProfile && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Name:{' '}
+                      <span className="font-medium text-foreground">
+                        {userProfile.preferred_name || userProfile.first_name}{' '}
+                        {userProfile.last_name}
+                      </span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Role:{' '}
+                      <span className="font-medium text-foreground">
+                        {userProfile.display_role}
+                      </span>
+                    </p>
+                  </>
                 )}
               </div>
             </CardContent>
@@ -137,7 +174,7 @@ export default function DashboardPage() {
         );
       case 'team-management':
         return (
-          <TeamManagementDashboard userRole={user?.user_metadata?.role} />
+          <TeamManagementDashboard userRole={userProfile?.role} />
         );
       case 'applications':
         return (
@@ -274,17 +311,17 @@ export default function DashboardPage() {
                   <SidebarMenuButton className="h-auto p-2">
                     <Avatar className="h-8 w-8 bg-blue-700">
                       <AvatarFallback className="bg-blue-700 text-white text-xs">
-                        {user?.user_metadata?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                        {userProfile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start flex-1">
                       <span className="text-xs font-medium">
-                        {user?.user_metadata?.first_name
-                          ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+                        {userProfile
+                          ? `${userProfile.preferred_name || userProfile.first_name} ${userProfile.last_name}`
                           : 'User'}
                       </span>
                       <span className="text-xs font-medium">
-                        {user?.user_metadata?.display_role || 'Member'}
+                        {userProfile?.display_role || 'Member'}
                       </span>
                     </div>
                     <ChevronUp className="ml-auto h-4 w-4" />

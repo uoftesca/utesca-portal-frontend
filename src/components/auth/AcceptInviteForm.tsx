@@ -124,14 +124,16 @@ export default function AcceptInviteForm() {
     setLoading(true);
 
     try {
-      // Get current session for auth token
+      // Get current session for auth token and user email
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.access_token) {
+      if (!session?.access_token || !session?.user?.email) {
         throw new Error('No active session found');
       }
+
+      const userEmail = session.user.email;
 
       // Call backend to complete onboarding (sets password + creates user record)
       const response = await fetch(
@@ -154,8 +156,21 @@ export default function AcceptInviteForm() {
         throw new Error(errorData.detail || 'Failed to complete onboarding');
       }
 
-      // Redirect to sign in page
-      router.push('/sign-in');
+      // Sign out the temporary invite session
+      await supabase.auth.signOut();
+
+      // Sign in with the new password to get a fresh session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: password,
+      });
+
+      if (signInError) {
+        throw new Error('Account created but failed to sign in. Please try signing in manually.');
+      }
+
+      // Redirect to dashboard
+      router.push('/');
     } catch (err: unknown) {
       console.error('Error setting up account:', err);
       setError(err instanceof Error ? err.message : 'Failed to set up account');
