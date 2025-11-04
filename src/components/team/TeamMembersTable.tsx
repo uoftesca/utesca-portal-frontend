@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -24,10 +24,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
+import { DeleteMemberDialog } from '@/components/team/DeleteMemberDialog';
 import type { User, Department, DepartmentListResponse, YearsResponse, UserListResponse } from '@/types/team';
 
 interface TeamMembersTableProps {
@@ -43,6 +51,8 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
+  const [deleteDialogUser, setDeleteDialogUser] = useState<User | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -183,6 +193,21 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
     setCurrentPage(1);
   };
 
+  const handleDeleteUser = (user: User) => {
+    setDeleteDialogUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    if (deleteDialogUser) {
+      // Remove the deleted user from local state instead of re-fetching
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== deleteDialogUser.id));
+      setTotal(prevTotal => prevTotal - 1);
+    }
+    setDeleteDialogOpen(false);
+    setDeleteDialogUser(null);
+  };
+
   if (loading && users.length === 0) {
     return (
       <div className="space-y-4">
@@ -243,12 +268,13 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
               <TableHead>Department</TableHead>
               <TableHead>Permission</TableHead>
               <TableHead className="text-right">Year</TableHead>
+              <TableHead className="w-8"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   <div className="flex justify-center">
                     <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
@@ -257,7 +283,7 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
             )}
             {!loading && users.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No members found matching your filters
                 </TableCell>
               </TableRow>
@@ -275,6 +301,30 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">{getDepartmentYear(user.department_id)}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem disabled>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit User
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleDeleteUser(user)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete User
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -311,6 +361,16 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
           </Button>
         </div>
       </div>
+
+      {/* Delete Member Dialog */}
+      {deleteDialogUser && (
+        <DeleteMemberDialog
+          user={deleteDialogUser}
+          onSuccess={handleDeleteSuccess}
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+        />
+      )}
     </div>
   );
 }

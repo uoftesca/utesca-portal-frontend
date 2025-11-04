@@ -61,3 +61,17 @@ export interface UserListResponse {
   page: number | null;
   page_size: number | null;
 }
+
+export interface UpdateUserRequest {
+  first_name?: string;
+  last_name?: string;
+  display_role?: string;
+  role?: UserRole;
+  department_id?: string;
+}
+
+export interface DeleteUserResponse {
+  success: boolean;
+  message: string;
+  deleted_user_id: string;
+}
