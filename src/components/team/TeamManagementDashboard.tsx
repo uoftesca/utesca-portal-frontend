@@ -10,9 +10,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OnboardMemberDialog } from './OnboardMemberDialog';
 import { TeamMembersTable } from './TeamMembersTable';
+import type { UserRole } from '@/types/user';
 
 interface TeamManagementDashboardProps {
-  readonly userRole?: string;
+  readonly userRole?: UserRole;
 }
 
 export function TeamManagementDashboard({ userRole }: TeamManagementDashboardProps) {

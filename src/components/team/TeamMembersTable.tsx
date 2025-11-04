@@ -41,7 +41,7 @@ import type { User, Department, DepartmentListResponse, YearsResponse, UserListR
 
 interface TeamMembersTableProps {
   refreshTrigger?: number;
-  currentUserRole?: string;
+  currentUserRole?: UserRole;
 }
 
 export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<TeamMembersTableProps>) {
@@ -383,10 +383,10 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
       </div>
 
       {/* Edit Member Dialog */}
-      {editDialogUser && (
+      {editDialogUser && currentUserRole && (
         <EditMemberDialog
           user={editDialogUser}
-          currentUserRole={currentUserRole as UserRole}
+          currentUserRole={currentUserRole}
           onSuccess={handleEditSuccess}
           open={editDialogOpen}
           onOpenChange={(open) => {
