@@ -106,4 +106,23 @@ export const apiClient = {
   getUserById: async (userId: string) => {
     return apiRequest(`/users/${userId}`);
   },
+
+  updateUser: async (userId: string, data: {
+    first_name?: string;
+    last_name?: string;
+    display_role?: string;
+    role?: 'co_president' | 'vp' | 'director';
+    department_id?: string;
+  }) => {
+    return apiRequest(`/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteUser: async (userId: string) => {
+    return apiRequest(`/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
 };

@@ -2,9 +2,11 @@
  * TypeScript types for Team Management
  */
 
-export type UserRole = 'co_president' | 'vp' | 'director';
 
-export type EmailNotificationPreference = 'all' | 'urgent_only' | 'none';
+import type { UserRole, EmailNotificationPreference } from './user';
+
+// Re-export user types for convenience so consumers can import from either file
+export { type UserRole, type EmailNotificationPreference } from './user';
 
 export interface Department {
   id: string;
@@ -60,4 +62,18 @@ export interface UserListResponse {
   users: User[];
   page: number | null;
   page_size: number | null;
+}
+
+export interface UpdateUserRequest {
+  first_name?: string;
+  last_name?: string;
+  display_role?: string;
+  role?: UserRole;
+  department_id?: string;
+}
+
+export interface DeleteUserResponse {
+  success: boolean;
+  message: string;
+  deleted_user_id: string;
 }
