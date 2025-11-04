@@ -36,13 +36,15 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
 import { DeleteMemberDialog } from '@/components/team/DeleteMemberDialog';
-import type { User, Department, DepartmentListResponse, YearsResponse, UserListResponse } from '@/types/team';
+import { EditMemberDialog } from '@/components/team/EditMemberDialog';
+import type { User, Department, DepartmentListResponse, YearsResponse, UserListResponse, UserRole } from '@/types/team';
 
 interface TeamMembersTableProps {
   refreshTrigger?: number;
+  currentUserRole?: string;
 }
 
-export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTableProps>) {
+export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<TeamMembersTableProps>) {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
@@ -53,6 +55,8 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [deleteDialogUser, setDeleteDialogUser] = useState<User | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogUser, setEditDialogUser] = useState<User | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -193,6 +197,20 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
     setCurrentPage(1);
   };
 
+  const handleEditUser = (user: User) => {
+    setEditDialogUser(user);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = (updatedUser: User) => {
+    // Update the user in local state instead of re-fetching
+    setUsers(prevUsers =>
+      prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u))
+    );
+    setEditDialogOpen(false);
+    setEditDialogUser(null);
+  };
+
   const handleDeleteUser = (user: User) => {
     setDeleteDialogUser(user);
     setDeleteDialogOpen(true);
@@ -302,28 +320,30 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
                 </TableCell>
                 <TableCell className="text-right">{getDepartmentYear(user.department_id)}</TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem disabled>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit User
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => handleDeleteUser(user)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {(currentUserRole === 'co_president' || currentUserRole === 'vp') && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit User
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => handleDeleteUser(user)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete User
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -362,13 +382,34 @@ export function TeamMembersTable({ refreshTrigger }: Readonly<TeamMembersTablePr
         </div>
       </div>
 
+      {/* Edit Member Dialog */}
+      {editDialogUser && (
+        <EditMemberDialog
+          user={editDialogUser}
+          currentUserRole={currentUserRole as UserRole}
+          onSuccess={handleEditSuccess}
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) {
+              setEditDialogUser(null);
+            }
+          }}
+        />
+      )}
+
       {/* Delete Member Dialog */}
       {deleteDialogUser && (
         <DeleteMemberDialog
           user={deleteDialogUser}
           onSuccess={handleDeleteSuccess}
           open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) {
+              setDeleteDialogUser(null);
+            }
+          }}
         />
       )}
     </div>

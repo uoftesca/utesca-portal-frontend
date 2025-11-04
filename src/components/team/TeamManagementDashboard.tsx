@@ -47,7 +47,7 @@ export function TeamManagementDashboard({ userRole }: TeamManagementDashboardPro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TeamMembersTable refreshTrigger={refreshTrigger} />
+          <TeamMembersTable refreshTrigger={refreshTrigger} currentUserRole={userRole} />
         </CardContent>
       </Card>
     </div>
