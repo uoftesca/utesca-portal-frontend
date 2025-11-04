@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Pencil } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -181,14 +180,11 @@ export function EditMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button variant="outline" className="gap-2">
-            <Pencil className="h-4 w-4" />
-            Edit User
-          </Button>
-        )}
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
