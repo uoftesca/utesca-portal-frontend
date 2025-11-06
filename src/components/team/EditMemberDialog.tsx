@@ -175,7 +175,7 @@ export function EditMemberDialog({
   };
 
   const displayName = user.preferred_name
-    ? `${user.preferred_name} ${user.last_name}`
+    ? `${user.first_name} (${user.preferred_name}) ${user.last_name}`
     : `${user.first_name} ${user.last_name}`;
 
   return (
