@@ -24,6 +24,17 @@ interface UserMetadata {
   displayRole: string;
 }
 
+// Raw metadata from Supabase may be in snake_case or camelCase
+interface RawUserMetadata {
+  first_name?: string;
+  firstName?: string;
+  last_name?: string;
+  lastName?: string;
+  role?: string;
+  display_role?: string;
+  displayRole?: string;
+}
+
 export default function AcceptInviteForm() {
   const router = useRouter();
   const supabase = createClient();
@@ -40,7 +51,7 @@ export default function AcceptInviteForm() {
     async function verifyInvite() {
       try {
         // Check search params for token_hash (Supabase invite flow)
-        const searchParams = new URLSearchParams(window.location.search);
+        const searchParams = new URLSearchParams(globalThis.location.search);
         const tokenHash = searchParams.get('token_hash');
         const typeParam = searchParams.get('type');
 
@@ -59,12 +70,12 @@ export default function AcceptInviteForm() {
           if (data.session && data.user) {
             // Extract user metadata from session
             // Note: Supabase metadata may still be in snake_case, so we need to handle both
-            const rawMetadata = data.user.user_metadata as any;
+            const rawMetadata = data.user.user_metadata as RawUserMetadata;
             const metadata: UserMetadata = {
-              firstName: rawMetadata.first_name || rawMetadata.firstName,
-              lastName: rawMetadata.last_name || rawMetadata.lastName,
-              role: rawMetadata.role,
-              displayRole: rawMetadata.display_role || rawMetadata.displayRole,
+              firstName: rawMetadata.first_name || rawMetadata.firstName || '',
+              lastName: rawMetadata.last_name || rawMetadata.lastName || '',
+              role: rawMetadata.role || '',
+              displayRole: rawMetadata.display_role || rawMetadata.displayRole || '',
             };
             if (!metadata.firstName || !metadata.lastName) {
               console.error('Missing metadata:', rawMetadata);
@@ -74,10 +85,10 @@ export default function AcceptInviteForm() {
 
             setUserMetadata(metadata);
             // Clean up URL
-            window.history.replaceState(
+            globalThis.history.replaceState(
               {},
               document.title,
-              window.location.pathname
+              globalThis.location.pathname
             );
             return;
           }
@@ -97,12 +108,12 @@ export default function AcceptInviteForm() {
 
         // Extract user metadata from session
         // Note: Supabase metadata may still be in snake_case, so we need to handle both
-        const rawMetadata = session.user.user_metadata as any;
+        const rawMetadata = session.user.user_metadata as RawUserMetadata;
         const metadata: UserMetadata = {
-          firstName: rawMetadata.first_name || rawMetadata.firstName,
-          lastName: rawMetadata.last_name || rawMetadata.lastName,
-          role: rawMetadata.role,
-          displayRole: rawMetadata.display_role || rawMetadata.displayRole,
+          firstName: rawMetadata.first_name || rawMetadata.firstName || '',
+          lastName: rawMetadata.last_name || rawMetadata.lastName || '',
+          role: rawMetadata.role || '',
+          displayRole: rawMetadata.display_role || rawMetadata.displayRole || '',
         };
         if (!metadata.firstName || !metadata.lastName) {
           console.error('Missing metadata in existing session:', rawMetadata);
