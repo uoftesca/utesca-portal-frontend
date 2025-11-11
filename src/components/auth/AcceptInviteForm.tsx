@@ -18,10 +18,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface UserMetadata {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   role: string;
-  display_role: string;
+  displayRole: string;
 }
 
 export default function AcceptInviteForm() {
@@ -58,9 +58,16 @@ export default function AcceptInviteForm() {
 
           if (data.session && data.user) {
             // Extract user metadata from session
-            const metadata = data.user.user_metadata as UserMetadata;
-            if (!metadata.first_name || !metadata.last_name) {
-              console.error('Missing metadata:', metadata);
+            // Note: Supabase metadata may still be in snake_case, so we need to handle both
+            const rawMetadata = data.user.user_metadata as any;
+            const metadata: UserMetadata = {
+              firstName: rawMetadata.first_name || rawMetadata.firstName,
+              lastName: rawMetadata.last_name || rawMetadata.lastName,
+              role: rawMetadata.role,
+              displayRole: rawMetadata.display_role || rawMetadata.displayRole,
+            };
+            if (!metadata.firstName || !metadata.lastName) {
+              console.error('Missing metadata:', rawMetadata);
               setError('Invalid user metadata - please contact co-presidents');
               return;
             }
@@ -89,9 +96,16 @@ export default function AcceptInviteForm() {
         }
 
         // Extract user metadata from session
-        const metadata = session.user.user_metadata as UserMetadata;
-        if (!metadata.first_name || !metadata.last_name) {
-          console.error('Missing metadata in existing session:', metadata);
+        // Note: Supabase metadata may still be in snake_case, so we need to handle both
+        const rawMetadata = session.user.user_metadata as any;
+        const metadata: UserMetadata = {
+          firstName: rawMetadata.first_name || rawMetadata.firstName,
+          lastName: rawMetadata.last_name || rawMetadata.lastName,
+          role: rawMetadata.role,
+          displayRole: rawMetadata.display_role || rawMetadata.displayRole,
+        };
+        if (!metadata.firstName || !metadata.lastName) {
+          console.error('Missing metadata in existing session:', rawMetadata);
           setError('Invalid user metadata. Please contact co-presidents');
           return;
         }
@@ -146,7 +160,7 @@ export default function AcceptInviteForm() {
           },
           body: JSON.stringify({
             password: password,
-            preferred_name: preferredName.trim() || null,
+            preferredName: preferredName.trim() || null,
           }),
         }
       );
@@ -210,11 +224,11 @@ export default function AcceptInviteForm() {
         <CardContent className="space-y-1">
           <p className="text-sm">
             <strong className="font-medium">Name:</strong>{' '}
-            {userMetadata.first_name} {userMetadata.last_name}
+            {userMetadata.firstName} {userMetadata.lastName}
           </p>
           <p className="text-sm">
             <strong className="font-medium">Role:</strong>{' '}
-            {userMetadata.display_role}
+            {userMetadata.displayRole}
           </p>
         </CardContent>
       </Card>
@@ -234,7 +248,7 @@ export default function AcceptInviteForm() {
             placeholder="How you'd like to be called"
           />
           <p className="text-xs text-muted-foreground">
-            If different from {userMetadata.first_name}
+            If different from {userMetadata.firstName}
           </p>
         </div>
 

@@ -143,14 +143,14 @@ export default function DashboardPage() {
                     <p className="text-sm text-muted-foreground">
                       Name:{' '}
                       <span className="font-medium text-foreground">
-                        {userProfile.preferred_name || userProfile.first_name}{' '}
-                        {userProfile.last_name}
+                        {userProfile.preferredName || userProfile.firstName}{' '}
+                        {userProfile.lastName}
                       </span>
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Role:{' '}
                       <span className="font-medium text-foreground">
-                        {userProfile.display_role}
+                        {userProfile.displayRole}
                       </span>
                     </p>
                   </>
@@ -311,17 +311,17 @@ export default function DashboardPage() {
                   <SidebarMenuButton className="h-auto p-2">
                     <Avatar className="h-8 w-8 bg-blue-700">
                       <AvatarFallback className="bg-blue-700 text-white text-xs">
-                        {userProfile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                        {userProfile?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start flex-1">
                       <span className="text-xs font-medium">
                         {userProfile
-                          ? `${userProfile.preferred_name || userProfile.first_name} ${userProfile.last_name}`
+                          ? `${userProfile.preferredName || userProfile.firstName} ${userProfile.lastName}`
                           : 'User'}
                       </span>
                       <span className="text-xs font-medium">
-                        {userProfile?.display_role || 'Member'}
+                        {userProfile?.displayRole || 'Member'}
                       </span>
                     </div>
                     <ChevronUp className="ml-auto h-4 w-4" />

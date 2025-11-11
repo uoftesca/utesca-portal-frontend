@@ -40,11 +40,11 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
   const [departments, setDepartments] = useState<Department[]>([]);
   const [formData, setFormData] = useState<InviteUserRequest>({
     email: '',
-    first_name: '',
-    last_name: '',
+    firstName: '',
+    lastName: '',
     role: 'director',
-    display_role: '',
-    department_id: undefined,
+    displayRole: '',
+    departmentId: undefined,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +73,7 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
     setError(null);
 
     // Check if department is selected (Select component doesn't support required attribute)
-    if (!formData.department_id) {
+    if (!formData.departmentId) {
       setError('Please select a department');
       return;
     }
@@ -86,11 +86,11 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
       // Reset form
       setFormData({
         email: '',
-        first_name: '',
-        last_name: '',
+        firstName: '',
+        lastName: '',
         role: 'director',
-        display_role: '',
-        department_id: undefined,
+        displayRole: '',
+        departmentId: undefined,
       });
 
       setOpen(false);
@@ -130,24 +130,24 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="first_name">First Name</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
-                  id="first_name"
-                  value={formData.first_name}
+                  id="firstName"
+                  value={formData.firstName}
                   onChange={(e) =>
-                    setFormData({ ...formData, first_name: e.target.value })
+                    setFormData({ ...formData, firstName: e.target.value })
                   }
                   required
                   placeholder="John"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="last_name">Last Name</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
-                  id="last_name"
-                  value={formData.last_name}
+                  id="lastName"
+                  value={formData.lastName}
                   onChange={(e) =>
-                    setFormData({ ...formData, last_name: e.target.value })
+                    setFormData({ ...formData, lastName: e.target.value })
                   }
                   required
                   placeholder="Doe"
@@ -192,12 +192,12 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="display_role">Display Role</Label>
+              <Label htmlFor="displayRole">Display Role</Label>
               <Input
-                id="display_role"
-                value={formData.display_role}
+                id="displayRole"
+                value={formData.displayRole}
                 onChange={(e) =>
-                  setFormData({ ...formData, display_role: e.target.value })
+                  setFormData({ ...formData, displayRole: e.target.value })
                 }
                 required
                 placeholder="e.g., VP of Events, Marketing Director"
@@ -210,9 +210,9 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
             <div className="grid gap-2">
               <Label htmlFor="department">Department</Label>
               <Select
-                value={formData.department_id}
+                value={formData.departmentId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, department_id: value })
+                  setFormData({ ...formData, departmentId: value })
                 }
               >
                 <SelectTrigger id="department">

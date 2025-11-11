@@ -62,9 +62,9 @@ export function DeleteMemberDialog({
     }
   };
 
-  const displayName = user.preferred_name
-    ? `${user.first_name} (${user.preferred_name}) ${user.last_name}`
-    : `${user.first_name} ${user.last_name}`;
+  const displayName = user.preferredName
+    ? `${user.firstName} (${user.preferredName}) ${user.lastName}`
+    : `${user.firstName} ${user.lastName}`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,7 +101,7 @@ export function DeleteMemberDialog({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Role:</span>
-              <span className="font-medium">{user.display_role}</span>
+              <span className="font-medium">{user.displayRole}</span>
             </div>
           </div>
 

@@ -67,11 +67,11 @@ export const apiClient = {
   // Auth / Users
   inviteUser: async (data: {
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     role: 'co_president' | 'vp' | 'director';
-    display_role: string;
-    department_id?: string;
+    displayRole: string;
+    departmentId?: string;
   }) => {
     return apiRequest('/auth/invite', {
       method: 'POST',
@@ -85,20 +85,20 @@ export const apiClient = {
 
   // Users
   getUsers: async (params?: {
-    department_id?: string;
+    departmentId?: string;
     role?: string;
     year?: number;
     search?: string;
     page?: number;
-    page_size?: number;
+    pageSize?: number;
   }) => {
     const query = new URLSearchParams();
-    if (params?.department_id) query.append('department_id', params.department_id);
+    if (params?.departmentId) query.append('department_id', params.departmentId);
     if (params?.role) query.append('role', params.role);
     if (params?.year) query.append('year', params.year.toString());
     if (params?.search) query.append('search', params.search);
     if (params?.page) query.append('page', params.page.toString());
-    if (params?.page_size) query.append('page_size', params.page_size.toString());
+    if (params?.pageSize) query.append('page_size', params.pageSize.toString());
     const queryString = query.toString() ? `?${query.toString()}` : '';
     return apiRequest(`/users${queryString}`);
   },
@@ -108,11 +108,11 @@ export const apiClient = {
   },
 
   updateUser: async (userId: string, data: {
-    first_name?: string;
-    last_name?: string;
-    display_role?: string;
+    firstName?: string;
+    lastName?: string;
+    displayRole?: string;
     role?: 'co_president' | 'vp' | 'director';
-    department_id?: string;
+    departmentId?: string;
   }) => {
     return apiRequest(`/users/${userId}`, {
       method: 'PUT',

@@ -50,11 +50,11 @@ export function EditMemberDialog({
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [formData, setFormData] = useState({
-    first_name: user.first_name,
-    last_name: user.last_name,
-    display_role: user.display_role,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    displayRole: user.displayRole,
     role: user.role,
-    department_id: user.department_id || 'none',
+    departmentId: user.departmentId || 'none',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -75,11 +75,11 @@ export function EditMemberDialog({
       loadDepartments();
       // Reset form data when opening
       setFormData({
-        first_name: user.first_name,
-        last_name: user.last_name,
-        display_role: user.display_role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        displayRole: user.displayRole,
         role: user.role,
-        department_id: user.department_id || 'none',
+        departmentId: user.departmentId || 'none',
       });
       setErrors({});
       setError(null);
@@ -99,22 +99,22 @@ export function EditMemberDialog({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
-    } else if (formData.first_name.length > 100) {
-      newErrors.first_name = 'First name must be 100 characters or less';
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    } else if (formData.firstName.length > 100) {
+      newErrors.firstName = 'First name must be 100 characters or less';
     }
 
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
-    } else if (formData.last_name.length > 100) {
-      newErrors.last_name = 'Last name must be 100 characters or less';
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.length > 100) {
+      newErrors.lastName = 'Last name must be 100 characters or less';
     }
 
-    if (!formData.display_role.trim()) {
-      newErrors.display_role = 'Display role is required';
-    } else if (formData.display_role.length > 255) {
-      newErrors.display_role = 'Display role must be 255 characters or less';
+    if (!formData.displayRole.trim()) {
+      newErrors.displayRole = 'Display role is required';
+    } else if (formData.displayRole.length > 255) {
+      newErrors.displayRole = 'Display role must be 255 characters or less';
     }
 
     setErrors(newErrors);
@@ -135,23 +135,23 @@ export function EditMemberDialog({
       // Build update request with only changed fields
       const updateData: UpdateUserRequest = {};
 
-      if (formData.first_name !== user.first_name) {
-        updateData.first_name = formData.first_name;
+      if (formData.firstName !== user.firstName) {
+        updateData.firstName = formData.firstName;
       }
-      if (formData.last_name !== user.last_name) {
-        updateData.last_name = formData.last_name;
+      if (formData.lastName !== user.lastName) {
+        updateData.lastName = formData.lastName;
       }
-      if (formData.display_role !== user.display_role) {
-        updateData.display_role = formData.display_role;
+      if (formData.displayRole !== user.displayRole) {
+        updateData.displayRole = formData.displayRole;
       }
       if (canEditRole && formData.role !== user.role) {
         updateData.role = formData.role;
       }
       if (canEditDepartment) {
-        const newDeptId = formData.department_id === 'none' ? undefined : formData.department_id;
-        const currentDeptId = user.department_id || undefined;
+        const newDeptId = formData.departmentId === 'none' ? undefined : formData.departmentId;
+        const currentDeptId = user.departmentId || undefined;
         if (newDeptId !== currentDeptId) {
-          updateData.department_id = newDeptId;
+          updateData.departmentId = newDeptId;
         }
       }
 
@@ -174,9 +174,9 @@ export function EditMemberDialog({
     }
   };
 
-  const displayName = user.preferred_name
-    ? `${user.first_name} (${user.preferred_name}) ${user.last_name}`
-    : `${user.first_name} ${user.last_name}`;
+  const displayName = user.preferredName
+    ? `${user.firstName} (${user.preferredName}) ${user.lastName}`
+    : `${user.firstName} ${user.lastName}`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -203,46 +203,46 @@ export function EditMemberDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <Field>
-                <FieldLabel htmlFor="first_name">First Name</FieldLabel>
+                <FieldLabel htmlFor="firstName">First Name</FieldLabel>
                 <Input
-                  id="first_name"
-                  value={formData.first_name}
+                  id="firstName"
+                  value={formData.firstName}
                   onChange={(e) =>
-                    setFormData({ ...formData, first_name: e.target.value })
+                    setFormData({ ...formData, firstName: e.target.value })
                   }
                   placeholder="John"
                 />
-                {errors.first_name && <FieldError>{errors.first_name}</FieldError>}
+                {errors.firstName && <FieldError>{errors.firstName}</FieldError>}
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="last_name">Last Name</FieldLabel>
+                <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
                 <Input
-                  id="last_name"
-                  value={formData.last_name}
+                  id="lastName"
+                  value={formData.lastName}
                   onChange={(e) =>
-                    setFormData({ ...formData, last_name: e.target.value })
+                    setFormData({ ...formData, lastName: e.target.value })
                   }
                   placeholder="Doe"
                 />
-                {errors.last_name && <FieldError>{errors.last_name}</FieldError>}
+                {errors.lastName && <FieldError>{errors.lastName}</FieldError>}
               </Field>
             </div>
 
             <Field>
-              <FieldLabel htmlFor="display_role">Display Role</FieldLabel>
+              <FieldLabel htmlFor="displayRole">Display Role</FieldLabel>
               <Input
-                id="display_role"
-                value={formData.display_role}
+                id="displayRole"
+                value={formData.displayRole}
                 onChange={(e) =>
-                  setFormData({ ...formData, display_role: e.target.value })
+                  setFormData({ ...formData, displayRole: e.target.value })
                 }
                 placeholder="e.g., VP of Events, Marketing Director"
               />
               <FieldDescription>
                 Public-facing role title shown on the website
               </FieldDescription>
-              {errors.display_role && <FieldError>{errors.display_role}</FieldError>}
+              {errors.displayRole && <FieldError>{errors.displayRole}</FieldError>}
             </Field>
 
             {canEditRole && (
@@ -273,9 +273,9 @@ export function EditMemberDialog({
               <Field>
                 <FieldLabel htmlFor="department">Department</FieldLabel>
                 <Select
-                  value={formData.department_id}
+                  value={formData.departmentId}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, department_id: value })
+                    setFormData({ ...formData, departmentId: value })
                   }
                 >
                   <SelectTrigger id="department">

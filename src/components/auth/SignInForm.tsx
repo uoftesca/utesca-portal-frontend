@@ -54,9 +54,10 @@ export function SignInForm() {
       }
 
       // Set session in Supabase client for automatic token refresh
+      // Note: Supabase expects snake_case, but backend returns camelCase
       const { error: sessionError } = await supabase.auth.setSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
+        access_token: data.accessToken || data.access_token,
+        refresh_token: data.refreshToken || data.refresh_token,
       });
 
       if (sessionError) {

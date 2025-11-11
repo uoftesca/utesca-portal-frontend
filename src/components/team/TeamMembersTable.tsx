@@ -89,14 +89,14 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
     setLoading(true);
     try {
       const params: {
-        department_id?: string;
+        departmentId?: string;
         year?: number;
         search?: string;
         page: number;
-        page_size: number;
+        pageSize: number;
       } = {
         page: currentPage,
-        page_size: pageSize,
+        pageSize: pageSize,
       };
 
       if (selectedDepartment !== 'all') {
@@ -104,7 +104,7 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
           // Handle "Executive Board" (no department) filter
           // This would require backend support - for now skip
         } else {
-          params.department_id = selectedDepartment;
+          params.departmentId = selectedDepartment;
         }
       }
 
@@ -309,16 +309,16 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
             {!loading && users.length > 0 && users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
-                  {user.preferred_name ? `${user.preferred_name} ${user.last_name}` : `${user.first_name} ${user.last_name}`}
+                  {user.preferredName ? `${user.preferredName} ${user.lastName}` : `${user.firstName} ${user.lastName}`}
                 </TableCell>
-                <TableCell>{user.display_role}</TableCell>
-                <TableCell>{getDepartmentName(user.department_id)}</TableCell>
+                <TableCell>{user.displayRole}</TableCell>
+                <TableCell>{getDepartmentName(user.departmentId)}</TableCell>
                 <TableCell>
                   <Badge variant={getRoleBadgeVariant(user.role)}>
                     {getRoleLabel(user.role)}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">{getDepartmentYear(user.department_id)}</TableCell>
+                <TableCell className="text-right">{getDepartmentYear(user.departmentId)}</TableCell>
                 <TableCell>
                   {(currentUserRole === 'co_president' || currentUserRole === 'vp') && (
                     <DropdownMenu>
