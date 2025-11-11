@@ -5,6 +5,17 @@
  */
 
 import { createClient } from '@/lib/supabase';
+import {
+  CreateEventRequest,
+  UpdateEventRequest,
+  GetEventsParams,
+} from '@/types/event';
+import { GetUsersParams } from '@/types/user';
+import {
+  InviteUserRequest,
+  UpdateUserRequest,
+  GetDepartmentsParams,
+} from '@/types/team';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
 
@@ -52,7 +63,7 @@ async function apiRequest<T>(
  */
 export const apiClient = {
   // Departments
-  getDepartments: async (params?: { year?: number; all?: boolean }) => {
+  getDepartments: async (params?: GetDepartmentsParams) => {
     const query = new URLSearchParams();
     if (params?.year) query.append('year', params.year.toString());
     if (params?.all) query.append('all', 'true');
@@ -65,14 +76,7 @@ export const apiClient = {
   },
 
   // Auth / Users
-  inviteUser: async (data: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: 'co_president' | 'vp' | 'director';
-    displayRole: string;
-    departmentId?: string;
-  }) => {
+  inviteUser: async (data: InviteUserRequest) => {
     return apiRequest('/auth/invite', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -84,14 +88,7 @@ export const apiClient = {
   },
 
   // Users
-  getUsers: async (params?: {
-    departmentId?: string;
-    role?: string;
-    year?: number;
-    search?: string;
-    page?: number;
-    pageSize?: number;
-  }) => {
+  getUsers: async (params?: GetUsersParams) => {
     const query = new URLSearchParams();
     if (params?.departmentId) query.append('department_id', params.departmentId);
     if (params?.role) query.append('role', params.role);
@@ -107,13 +104,7 @@ export const apiClient = {
     return apiRequest(`/users/${userId}`);
   },
 
-  updateUser: async (userId: string, data: {
-    firstName?: string;
-    lastName?: string;
-    displayRole?: string;
-    role?: 'co_president' | 'vp' | 'director';
-    departmentId?: string;
-  }) => {
+  updateUser: async (userId: string, data: UpdateUserRequest) => {
     return apiRequest(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -122,6 +113,38 @@ export const apiClient = {
 
   deleteUser: async (userId: string) => {
     return apiRequest(`/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Events
+  getEvents: async (params?: GetEventsParams) => {
+    const query = new URLSearchParams();
+    if (params?.status) query.append('status', params.status);
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return apiRequest(`/events${queryString}`);
+  },
+
+  getEventById: async (eventId: string) => {
+    return apiRequest(`/events/${eventId}`);
+  },
+
+  createEvent: async (data: CreateEventRequest) => {
+    return apiRequest('/events', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateEvent: async (eventId: string, data: UpdateEventRequest) => {
+    return apiRequest(`/events/${eventId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteEvent: async (eventId: string) => {
+    return apiRequest(`/events/${eventId}`, {
       method: 'DELETE',
     });
   },

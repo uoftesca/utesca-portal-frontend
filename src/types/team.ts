@@ -77,3 +77,11 @@ export interface DeleteUserResponse {
   message: string;
   deletedUserId: string;
 }
+
+/**
+ * Query parameters for getting departments
+ */
+export interface GetDepartmentsParams {
+  year?: number;
+  all?: boolean;
+}

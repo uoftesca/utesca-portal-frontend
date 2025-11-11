@@ -25,3 +25,15 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Query parameters for getting users
+ */
+export interface GetUsersParams {
+  departmentId?: string;
+  role?: string;
+  year?: number;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}
