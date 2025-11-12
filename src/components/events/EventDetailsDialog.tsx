@@ -7,7 +7,7 @@
  * Handles URL routing through controlled open state
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Edit, Trash2, Calendar, MapPin, Users, ExternalLink } from 'lucide-react';
 import {
@@ -30,9 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { apiClient } from '@/lib/api-client';
+import { useEvent, useUpdateEvent } from '@/hooks/use-events';
 import { DeleteEventDialog } from './DeleteEventDialog';
-import type { Event, UpdateEventRequest, EventStatus } from '@/types/event';
+import type { UpdateEventRequest, EventStatus } from '@/types/event';
 import type { UserRole } from '@/types/team';
 
 interface EventDetailsDialogProps {
@@ -78,80 +78,66 @@ export function EventDetailsDialog({
   onOpenChange,
   onSuccess,
 }: Readonly<EventDetailsDialogProps>) {
-  const [event, setEvent] = useState<Event | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<UpdateEventRequest>({});
-  const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   // Determine if user can edit (VPs and Co-presidents)
   const canEdit = userRole === 'vp' || userRole === 'co_president';
 
-  const loadEvent = useCallback(async () => {
-    if (!eventId) return;
+  // Fetch event data using React Query
+  const {
+    data: event,
+    isLoading: loading,
+    error: eventError,
+  } = useEvent(eventId);
 
-    setLoading(true);
-    setError(null);
-    setImageError(false);
+  const updateEventMutation = useUpdateEvent();
 
-    try {
-      const eventData = (await apiClient.getEventById(eventId)) as Event;
-      setEvent(eventData);
-      // Initialize form data with event values
-      setFormData({
-        title: eventData.title,
-        description: eventData.description || '',
-        dateTime: eventData.dateTime,
-        location: eventData.location || '',
-        registrationDeadline: eventData.registrationDeadline || '',
-        status: eventData.status,
-        maxCapacity: eventData.maxCapacity || undefined,
-        imageUrl: eventData.imageUrl || '',
-        category: eventData.category || '',
-        albumLink: eventData.albumLink || '',
-        registrationLink: eventData.registrationLink || '',
-      });
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load event';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
-
-  // Load event data when dialog opens or eventId changes
+  // Initialize form data when event loads
   useEffect(() => {
-    if (open && eventId) {
-      loadEvent();
-    } else {
-      // Reset state when dialog closes
-      setEvent(null);
-      setIsEditMode(false);
-      setError(null);
-      setFormData({});
+    if (event && !isEditMode) {
+      setFormData({
+        title: event.title,
+        description: event.description || '',
+        dateTime: event.dateTime,
+        location: event.location || '',
+        registrationDeadline: event.registrationDeadline || '',
+        status: event.status,
+        maxCapacity: event.maxCapacity || undefined,
+        imageUrl: event.imageUrl || '',
+        category: event.category || '',
+        albumLink: event.albumLink || '',
+        registrationLink: event.registrationLink || '',
+      });
     }
-  }, [open, eventId, loadEvent]);
+  }, [event, isEditMode]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setIsEditMode(false);
+      setFormData({});
+      setImageError(false);
+    }
+  }, [open]);
 
   const handleSave = async () => {
     if (!event) return;
 
-    setError(null);
-    setLoading(true);
-
     try {
       const cleanedData = cleanFormData(formData);
-      await apiClient.updateEvent(event.id, cleanedData);
+      await updateEventMutation.mutateAsync({
+        eventId: event.id,
+        data: cleanedData,
+      });
 
       setIsEditMode(false);
       onOpenChange(false);
       onSuccess?.();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update event';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -234,14 +220,16 @@ export function EventDetailsDialog({
       );
     }
 
-    if (error && !event) {
+    if (eventError && !event) {
       return (
         <div className="space-y-4">
           <DialogHeader>
             <DialogTitle>Error</DialogTitle>
           </DialogHeader>
           <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-            {error}
+            {eventError instanceof Error
+              ? eventError.message
+              : 'Failed to load event'}
           </div>
           <DialogFooter>
             <Button onClick={() => onOpenChange(false)}>Close</Button>
@@ -268,9 +256,11 @@ export function EventDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {error && (
+          {updateEventMutation.isError && (
             <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-              {error}
+              {updateEventMutation.error instanceof Error
+                ? updateEventMutation.error.message
+                : 'Failed to update event'}
             </div>
           )}
 
@@ -537,7 +527,7 @@ export function EventDetailsDialog({
                 <Button
                   variant="destructive"
                   onClick={() => setDeleteDialogOpen(true)}
-                  disabled={loading}
+                  disabled={updateEventMutation.isPending}
                   className="gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -549,12 +539,15 @@ export function EventDetailsDialog({
                   type="button"
                   variant="outline"
                   onClick={() => setIsEditMode(false)}
-                  disabled={loading}
+                  disabled={updateEventMutation.isPending}
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleSave} disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Changes'}
+                <Button
+                  onClick={handleSave}
+                  disabled={updateEventMutation.isPending}
+                >
+                  {updateEventMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </>

@@ -28,12 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { apiClient } from '@/lib/api-client';
+import { useCreateEvent } from '@/hooks/use-events';
 import type { CreateEventRequest, EventStatus } from '@/types/event';
-
-interface CreateEventDialogProps {
-  onSuccess?: () => void;
-}
 
 // Helper to convert datetime-local to ISO 8601 string
 // The datetime-local input gives us local time
@@ -46,9 +42,8 @@ const convertToISO = (localDateTime: string): string => {
   return date.toISOString();
 };
 
-export function CreateEventDialog({ onSuccess }: Readonly<CreateEventDialogProps>) {
+export function CreateEventDialog() {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateEventRequest>({
     title: '',
     dateTime: '',
@@ -62,35 +57,40 @@ export function CreateEventDialog({ onSuccess }: Readonly<CreateEventDialogProps
     albumLink: '',
     registrationLink: '',
   });
-  const [error, setError] = useState<string | null>(null);
+
+  const createEventMutation = useCreateEvent();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+
+    // Clean up formData
+    // Remove empty strings for optional fields
+    const cleanedData: CreateEventRequest = {
+      title: formData.title,
+      dateTime: convertToISO(formData.dateTime),
+      status: formData.status,
+    };
+
+    // Add optional fields only if they have values
+    if (formData.description?.trim())
+      cleanedData.description = formData.description.trim();
+    if (formData.location?.trim()) cleanedData.location = formData.location.trim();
+    if (formData.registrationDeadline) {
+      cleanedData.registrationDeadline = convertToISO(
+        formData.registrationDeadline
+      );
+    }
+    if (formData.maxCapacity && formData.maxCapacity > 0)
+      cleanedData.maxCapacity = formData.maxCapacity;
+    if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
+    if (formData.category?.trim()) cleanedData.category = formData.category.trim();
+    if (formData.albumLink?.trim())
+      cleanedData.albumLink = formData.albumLink.trim();
+    if (formData.registrationLink?.trim())
+      cleanedData.registrationLink = formData.registrationLink.trim();
 
     try {
-      // Clean up formData
-      // Remove empty strings for optional fields
-      const cleanedData: CreateEventRequest = {
-        title: formData.title,
-        dateTime: convertToISO(formData.dateTime),
-        status: formData.status,
-      };
-
-      // Add optional fields only if they have values
-      if (formData.description?.trim()) cleanedData.description = formData.description.trim();
-      if (formData.location?.trim()) cleanedData.location = formData.location.trim();
-      if (formData.registrationDeadline) {
-        cleanedData.registrationDeadline = convertToISO(formData.registrationDeadline);
-      }
-      if (formData.maxCapacity && formData.maxCapacity > 0) cleanedData.maxCapacity = formData.maxCapacity;
-      if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
-      if (formData.category?.trim()) cleanedData.category = formData.category.trim();
-      if (formData.albumLink?.trim()) cleanedData.albumLink = formData.albumLink.trim();
-      if (formData.registrationLink?.trim()) cleanedData.registrationLink = formData.registrationLink.trim();
-
-      await apiClient.createEvent(cleanedData);
+      await createEventMutation.mutateAsync(cleanedData);
 
       // Reset form
       setFormData({
@@ -108,12 +108,8 @@ export function CreateEventDialog({ onSuccess }: Readonly<CreateEventDialogProps
       });
 
       setOpen(false);
-      onSuccess?.();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create event';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -135,9 +131,11 @@ export function CreateEventDialog({ onSuccess }: Readonly<CreateEventDialogProps
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            {error && (
+            {createEventMutation.isError && (
               <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
+                {createEventMutation.error instanceof Error
+                  ? createEventMutation.error.message
+                  : 'Failed to create event'}
               </div>
             )}
 
@@ -322,12 +320,12 @@ export function CreateEventDialog({ onSuccess }: Readonly<CreateEventDialogProps
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={createEventMutation.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Event'}
+            <Button type="submit" disabled={createEventMutation.isPending}>
+              {createEventMutation.isPending ? 'Creating...' : 'Create Event'}
             </Button>
           </DialogFooter>
         </form>

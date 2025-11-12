@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { apiClient } from '@/lib/api-client';
+import { useDeleteEvent } from '@/hooks/use-events';
 import type { Event } from '@/types/event';
 
 interface DeleteEventDialogProps {
@@ -37,28 +37,22 @@ export function DeleteEventDialog({
   children,
 }: Readonly<DeleteEventDialogProps>) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Use controlled or uncontrolled state
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
 
-  const handleDelete = async () => {
-    setError(null);
-    setLoading(true);
+  const deleteEventMutation = useDeleteEvent();
 
+  const handleDelete = async () => {
     try {
-      await apiClient.deleteEvent(event.id);
+      await deleteEventMutation.mutateAsync(event.id);
 
       setOpen(false);
       onSuccess?.();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete event';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -93,9 +87,11 @@ export function DeleteEventDialog({
         </DialogHeader>
 
         <div className="space-y-3 py-4">
-          {error && (
+          {deleteEventMutation.isError && (
             <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-              {error}
+              {deleteEventMutation.error instanceof Error
+                ? deleteEventMutation.error.message
+                : 'Failed to delete event'}
             </div>
           )}
 
@@ -129,7 +125,7 @@ export function DeleteEventDialog({
             type="button"
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={loading}
+            disabled={deleteEventMutation.isPending}
           >
             Cancel
           </Button>
@@ -137,9 +133,9 @@ export function DeleteEventDialog({
             type="button"
             variant="destructive"
             onClick={handleDelete}
-            disabled={loading}
+            disabled={deleteEventMutation.isPending}
           >
-            {loading ? 'Deleting...' : 'Delete Event'}
+            {deleteEventMutation.isPending ? 'Deleting...' : 'Delete Event'}
           </Button>
         </DialogFooter>
       </DialogContent>

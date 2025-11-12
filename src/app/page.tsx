@@ -400,8 +400,7 @@ export default function DashboardPage() {
         open={!!eventId}
         onOpenChange={handleEventModalClose}
         onSuccess={() => {
-          // Trigger refresh of events list by re-mounting the component
-          // The EventsManagementDashboard will reload events on mount
+          // Events will automatically refresh via React Query cache invalidation
           handleEventModalClose(false);
         }}
       />

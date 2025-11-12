@@ -7,15 +7,15 @@
  * Shows all events, published events, and drafts
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { apiClient } from '@/lib/api-client';
+import { useEvents } from '@/hooks/use-events';
 import { CreateEventDialog } from './CreateEventDialog';
 import { EventCard } from './EventCard';
-import type { Event, EventListResponse } from '@/types/event';
+import type { Event } from '@/types/event';
 import type { UserRole } from '@/types/team';
 
 interface EventsManagementDashboardProps {
@@ -28,53 +28,49 @@ export function EventsManagementDashboard({
   onEventClick,
 }: Readonly<EventsManagementDashboardProps>) {
   const [activeTab, setActiveTab] = useState('all');
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Determine if user can create events (VPs and Co-presidents)
   const canCreate = userRole === 'vp' || userRole === 'co_president';
 
-  const loadEvents = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // Fetch events based on active tab
+  // For 'drafts' tab, we fetch all events and filter client-side
+  // For 'published' tab, we fetch only published events
+  // React Query will cache both queries separately
+  const { data: allEventsData, isLoading: isLoadingAll, error: allEventsError } =
+    useEvents();
+  const {
+    data: publishedEventsData,
+    isLoading: isLoadingPublished,
+    error: publishedEventsError,
+  } = useEvents(activeTab === 'published' ? { status: 'published' } : undefined);
 
-    try {
-      let response: EventListResponse;
+  // Determine which data and loading state to use
+  const isLoading =
+    activeTab === 'published' ? isLoadingPublished : isLoadingAll;
+  const error =
+    activeTab === 'published' ? publishedEventsError : allEventsError;
 
-      if (activeTab === 'published') {
-        response = (await apiClient.getEvents({ status: 'published' })) as EventListResponse;
-      } else if (activeTab === 'drafts') {
-        // Load all non-published events (draft, pending_approval, sent_back)
-        const allResponse = (await apiClient.getEvents()) as EventListResponse;
-        response = {
-          events: allResponse.events.filter((e: Event) =>
-            ['draft', 'pending_approval', 'sent_back'].includes(e.status)
-          ),
-        };
-      } else {
-        // Load all events
-        response = (await apiClient.getEvents()) as EventListResponse;
-      }
+  // Process and sort events based on active tab
+  const events = useMemo(() => {
+    let eventsToShow: Event[] = [];
 
-      // Sort events: date (newest first)
-      const sortedEvents = [...response.events].sort((a, b) => {
-        return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
-      });
-
-      setEvents(sortedEvents);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load events';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    if (activeTab === 'published') {
+      eventsToShow = publishedEventsData?.events || [];
+    } else if (activeTab === 'drafts') {
+      // Filter drafts from all events
+      eventsToShow = (allEventsData?.events || []).filter((e) =>
+        ['draft', 'pending_approval', 'sent_back'].includes(e.status)
+      );
+    } else {
+      // All events
+      eventsToShow = allEventsData?.events || [];
     }
-  }, [activeTab]);
 
-  // Load events when component mounts or tab changes
-  useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+    // Sort events: date (newest first)
+    return [...eventsToShow].sort((a, b) => {
+      return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+    });
+  }, [activeTab, allEventsData, publishedEventsData]);
 
   // Filter events for drafts tab (includes pending_approval and sent_back)
   const getDraftEvents = () => {
@@ -85,7 +81,7 @@ export function EventsManagementDashboard({
 
   // Render event grid
   const renderEventGrid = (eventsToRender: Event[]) => {
-    if (loading) {
+    if (isLoading) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -106,7 +102,7 @@ export function EventsManagementDashboard({
     if (error) {
       return (
         <div className="bg-destructive/15 text-destructive text-sm p-4 rounded-md">
-          {error}
+          {error instanceof Error ? error.message : 'Failed to load events'}
         </div>
       );
     }
@@ -133,7 +129,7 @@ export function EventsManagementDashboard({
           </p>
           {canCreate && (
             <div className="mt-6">
-              <CreateEventDialog onSuccess={loadEvents} />
+              <CreateEventDialog />
             </div>
           )}
         </div>
@@ -163,7 +159,7 @@ export function EventsManagementDashboard({
             Manage and organize UTESCA events
           </p>
         </div>
-        {canCreate && <CreateEventDialog onSuccess={loadEvents} />}
+        {canCreate && <CreateEventDialog />}
       </div>
 
       {/* Tabs */}
