@@ -50,6 +50,27 @@ const convertToISO = (localDateTime: string): string => {
   return date.toISOString();
 };
 
+// Helper to clean form data for API request
+const cleanFormData = (formData: UpdateEventRequest): UpdateEventRequest => {
+  const cleanedData: UpdateEventRequest = {};
+
+  if (formData.title?.trim()) cleanedData.title = formData.title.trim();
+  if (formData.description?.trim()) cleanedData.description = formData.description.trim();
+  if (formData.dateTime) cleanedData.dateTime = convertToISO(formData.dateTime);
+  if (formData.location?.trim()) cleanedData.location = formData.location.trim();
+  if (formData.registrationDeadline) {
+    cleanedData.registrationDeadline = convertToISO(formData.registrationDeadline);
+  }
+  if (formData.status) cleanedData.status = formData.status;
+  if (formData.maxCapacity && formData.maxCapacity > 0) cleanedData.maxCapacity = formData.maxCapacity;
+  if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
+  if (formData.category?.trim()) cleanedData.category = formData.category.trim();
+  if (formData.albumLink?.trim()) cleanedData.albumLink = formData.albumLink.trim();
+  if (formData.registrationLink?.trim()) cleanedData.registrationLink = formData.registrationLink.trim();
+
+  return cleanedData;
+};
+
 export function EventDetailsDialog({
   eventId,
   userRole,
@@ -120,23 +141,7 @@ export function EventDetailsDialog({
     setLoading(true);
 
     try {
-      // Clean up formData - remove empty strings for optional fields
-      const cleanedData: UpdateEventRequest = {};
-
-      if (formData.title?.trim()) cleanedData.title = formData.title.trim();
-      if (formData.description?.trim()) cleanedData.description = formData.description.trim();
-      if (formData.dateTime) cleanedData.dateTime = convertToISO(formData.dateTime);
-      if (formData.location?.trim()) cleanedData.location = formData.location.trim();
-      if (formData.registrationDeadline) {
-        cleanedData.registrationDeadline = convertToISO(formData.registrationDeadline);
-      }
-      if (formData.status) cleanedData.status = formData.status;
-      if (formData.maxCapacity && formData.maxCapacity > 0) cleanedData.maxCapacity = formData.maxCapacity;
-      if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
-      if (formData.category?.trim()) cleanedData.category = formData.category.trim();
-      if (formData.albumLink?.trim()) cleanedData.albumLink = formData.albumLink.trim();
-      if (formData.registrationLink?.trim()) cleanedData.registrationLink = formData.registrationLink.trim();
-
+      const cleanedData = cleanFormData(formData);
       await apiClient.updateEvent(event.id, cleanedData);
 
       setIsEditMode(false);
@@ -269,100 +274,7 @@ export function EventDetailsDialog({
             </div>
           )}
 
-          {!isEditMode ? (
-            /* View Mode */
-            <div className="space-y-4">
-              {/* Event Image */}
-              {event.imageUrl && !imageError && (
-                <div className="relative w-full aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
-                  <Image
-                    src={event.imageUrl}
-                    alt={event.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                    onError={() => setImageError(true)}
-                  />
-                </div>
-              )}
-
-              {/* Date & Time */}
-              <div className="flex items-start gap-2 text-sm">
-                <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{formatDateTime(event.dateTime)}</p>
-                  {event.registrationDeadline && (
-                    <p className="text-muted-foreground text-xs mt-1">
-                      Registration closes: {formatDateTime(event.registrationDeadline)}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Location */}
-              {event.location && (
-                <div className="flex items-start gap-2 text-sm">
-                  <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <p>{event.location}</p>
-                </div>
-              )}
-
-              {/* Capacity */}
-              {event.maxCapacity && (
-                <div className="flex items-start gap-2 text-sm">
-                  <Users className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <p>Max capacity: {event.maxCapacity} attendees</p>
-                </div>
-              )}
-
-              {/* Category */}
-              {event.category && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Category: </span>
-                  <span className="font-medium">{event.category}</span>
-                </div>
-              )}
-
-              {/* Description */}
-              {event.description && (
-                <div className="pt-2 border-t">
-                  <h4 className="font-semibold mb-2">Description</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {event.description}
-                  </p>
-                </div>
-              )}
-
-              {/* Links */}
-              {(event.registrationLink || event.albumLink) && (
-                <div className="pt-2 border-t space-y-2">
-                  <h4 className="font-semibold mb-2">Links</h4>
-                  {event.registrationLink && (
-                    <a
-                      href={event.registrationLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Registration Form
-                    </a>
-                  )}
-                  {event.albumLink && (
-                    <a
-                      href={event.albumLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Photo Album
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
+          {isEditMode ? (
             /* Edit Mode */
             <div className="space-y-4">
               <div className="grid gap-2">
@@ -522,27 +434,104 @@ export function EventDetailsDialog({
                 />
               </div>
             </div>
+          ) : (
+            /* View Mode */
+            <div className="space-y-4">
+              {/* Event Image */}
+              {event.imageUrl && !imageError && (
+                <div className="relative w-full aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
+                  <Image
+                    src={event.imageUrl}
+                    alt={event.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+                    onError={() => setImageError(true)}
+                  />
+                </div>
+              )}
+
+              {/* Date & Time */}
+              <div className="flex items-start gap-2 text-sm">
+                <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{formatDateTime(event.dateTime)}</p>
+                  {event.registrationDeadline && (
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Registration closes: {formatDateTime(event.registrationDeadline)}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Location */}
+              {event.location && (
+                <div className="flex items-start gap-2 text-sm">
+                  <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                  <p>{event.location}</p>
+                </div>
+              )}
+
+              {/* Capacity */}
+              {event.maxCapacity && (
+                <div className="flex items-start gap-2 text-sm">
+                  <Users className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                  <p>Max capacity: {event.maxCapacity} attendees</p>
+                </div>
+              )}
+
+              {/* Category */}
+              {event.category && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Category: </span>
+                  <span className="font-medium">{event.category}</span>
+                </div>
+              )}
+
+              {/* Description */}
+              {event.description && (
+                <div className="pt-2 border-t">
+                  <h4 className="font-semibold mb-2">Description</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {event.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Links */}
+              {(event.registrationLink || event.albumLink) && (
+                <div className="pt-2 border-t space-y-2">
+                  <h4 className="font-semibold mb-2">Links</h4>
+                  {event.registrationLink && (
+                    <a
+                      href={event.registrationLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Registration Form
+                    </a>
+                  )}
+                  {event.albumLink && (
+                    <a
+                      href={event.albumLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Photo Album
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         <DialogFooter className="flex flex-row justify-between items-center">
-          {!isEditMode ? (
-            <>
-              {canEdit && (
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditMode(true)}
-                  className="gap-2"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </Button>
-              )}
-              <Button onClick={() => onOpenChange(false)} className="ml-auto">
-                Close
-              </Button>
-            </>
-          ) : (
+          {isEditMode ? (
             <>
               {canEdit && (
                 <Button
@@ -568,6 +557,22 @@ export function EventDetailsDialog({
                   {loading ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
+            </>
+          ) : (
+            <>
+              {canEdit && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditMode(true)}
+                  className="gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              <Button onClick={() => onOpenChange(false)} className="ml-auto">
+                Close
+              </Button>
             </>
           )}
         </DialogFooter>
