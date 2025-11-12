@@ -15,11 +15,10 @@ export interface BaseEventFields {
   status?: EventStatus;
   registrationFormSchema?: Record<string, unknown>;
   maxCapacity?: number;
-  thumbnailUrl?: string;
   imageUrl?: string;
   category?: string;
   imagePosition?: string;
-  driveLink?: string;
+  albumLink?: string;
   registrationLink?: string;
 }
 
