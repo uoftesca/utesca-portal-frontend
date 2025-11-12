@@ -66,9 +66,14 @@ export function EventsManagementDashboard({
       eventsToShow = allEventsData?.events || [];
     }
 
-    // Sort events: date (newest first)
+    // Sort events: newest first, then alphabetical by title
     return [...eventsToShow].sort((a, b) => {
-      return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+      const dateDiff = new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      // If dates are equal, sort alphabetically by title
+      return a.title.localeCompare(b.title);
     });
   }, [activeTab, allEventsData, publishedEventsData]);
 
