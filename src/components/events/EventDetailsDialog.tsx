@@ -7,7 +7,7 @@
  * Handles URL routing through controlled open state
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Edit, Trash2, Calendar, MapPin, Users, ExternalLink } from 'lucide-react';
 import {
@@ -68,20 +68,7 @@ export function EventDetailsDialog({
   // Determine if user can edit (VPs and Co-presidents)
   const canEdit = userRole === 'vp' || userRole === 'co_president';
 
-  // Load event data when dialog opens or eventId changes
-  useEffect(() => {
-    if (open && eventId) {
-      loadEvent();
-    } else {
-      // Reset state when dialog closes
-      setEvent(null);
-      setIsEditMode(false);
-      setError(null);
-      setFormData({});
-    }
-  }, [open, eventId]);
-
-  const loadEvent = async () => {
+  const loadEvent = useCallback(async () => {
     if (!eventId) return;
 
     setLoading(true);
@@ -111,7 +98,20 @@ export function EventDetailsDialog({
     } finally {
       setLoading(false);
     }
-  };
+  }, [eventId]);
+
+  // Load event data when dialog opens or eventId changes
+  useEffect(() => {
+    if (open && eventId) {
+      loadEvent();
+    } else {
+      // Reset state when dialog closes
+      setEvent(null);
+      setIsEditMode(false);
+      setError(null);
+      setFormData({});
+    }
+  }, [open, eventId, loadEvent]);
 
   const handleSave = async () => {
     if (!event) return;
