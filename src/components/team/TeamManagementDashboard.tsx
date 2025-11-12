@@ -6,7 +6,6 @@
  * Main dashboard for managing executive team members
  */
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OnboardMemberDialog } from './OnboardMemberDialog';
 import { TeamMembersTable } from './TeamMembersTable';
@@ -17,14 +16,7 @@ interface TeamManagementDashboardProps {
 }
 
 export function TeamManagementDashboard({ userRole }: TeamManagementDashboardProps) {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-
   const isCoPresident = userRole === 'co_president';
-
-  const handleInviteSuccess = () => {
-    // Refresh the table
-    setRefreshTrigger((prev) => prev + 1);
-  };
 
   return (
     <div className="space-y-6">
@@ -36,7 +28,7 @@ export function TeamManagementDashboard({ userRole }: TeamManagementDashboardPro
             Manage your executive team members and their roles
           </p>
         </div>
-        {isCoPresident && <OnboardMemberDialog onSuccess={handleInviteSuccess} />}
+        {isCoPresident && <OnboardMemberDialog />}
       </div>
 
       {/* Content */}
@@ -48,7 +40,7 @@ export function TeamManagementDashboard({ userRole }: TeamManagementDashboardPro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TeamMembersTable refreshTrigger={refreshTrigger} currentUserRole={userRole} />
+          <TeamMembersTable currentUserRole={userRole} />
         </CardContent>
       </Card>
     </div>

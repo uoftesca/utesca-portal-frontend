@@ -6,7 +6,7 @@
  * Displays list of team members with filtering by year and department
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
@@ -34,22 +34,18 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { apiClient } from '@/lib/api-client';
+import { useUsers, useDepartments, useAvailableYears } from '@/hooks/use-users';
 import { DeleteMemberDialog } from '@/components/team/DeleteMemberDialog';
 import { EditMemberDialog } from '@/components/team/EditMemberDialog';
-import type { User, Department, DepartmentListResponse, YearsResponse, UserListResponse, UserRole } from '@/types/team';
+import type { User, UserRole } from '@/types/team';
 
 interface TeamMembersTableProps {
-  refreshTrigger?: number;
   currentUserRole?: UserRole;
 }
 
-export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<TeamMembersTableProps>) {
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
-  const [total, setTotal] = useState(0);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [years, setYears] = useState<number[]>([]);
+export function TeamMembersTable({
+  currentUserRole,
+}: Readonly<TeamMembersTableProps>) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
@@ -62,72 +58,54 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  useEffect(() => {
-    loadDepartmentsAndYears();
-  }, []);
+  // Build query params for users
+  const userParams = useMemo(() => {
+    const params: {
+      departmentId?: string;
+      year?: number;
+      search?: string;
+      page: number;
+      pageSize: number;
+    } = {
+      page: currentPage,
+      pageSize: pageSize,
+    };
 
-  useEffect(() => {
-    loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshTrigger, selectedYear, selectedDepartment, searchQuery, currentPage]);
-
-  const loadDepartmentsAndYears = async () => {
-    try {
-      const [deptResponse, yearsResponse] = await Promise.all([
-        apiClient.getDepartments({ all: true }),
-        apiClient.getAvailableYears(),
-      ]) as [DepartmentListResponse, YearsResponse];
-
-      setDepartments(deptResponse.departments || []);
-      setYears(yearsResponse.years || []);
-    } catch (err) {
-      console.error('Failed to load departments and years:', err);
+    if (selectedDepartment !== 'all') {
+      if (selectedDepartment === 'none') {
+        // Handle "Executive Board" (no department) filter
+        // This would require backend support - for now skip
+      } else {
+        params.departmentId = selectedDepartment;
+      }
     }
-  };
 
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const params: {
-        departmentId?: string;
-        year?: number;
-        search?: string;
-        page: number;
-        pageSize: number;
-      } = {
-        page: currentPage,
-        pageSize: pageSize,
-      };
-
-      if (selectedDepartment !== 'all') {
-        if (selectedDepartment === 'none') {
-          // Handle "Executive Board" (no department) filter
-          // This would require backend support - for now skip
-        } else {
-          params.departmentId = selectedDepartment;
-        }
-      }
-
-      if (selectedYear !== 'all') {
-        params.year = Number.parseInt(selectedYear, 10);
-      }
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      const response = await apiClient.getUsers(params) as UserListResponse;
-
-      setUsers(response.users || []);
-      setTotal(response.total || 0);
-    } catch (err) {
-      console.error('Failed to load users:', err);
-      setUsers([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
+    if (selectedYear !== 'all') {
+      params.year = Number.parseInt(selectedYear, 10);
     }
-  };
+
+    if (searchQuery) {
+      params.search = searchQuery;
+    }
+
+    return params;
+  }, [currentPage, selectedDepartment, selectedYear, searchQuery]);
+
+  // Fetch data using React Query
+  const {
+    data: usersData,
+    isLoading: isLoadingUsers,
+    error: usersError,
+  } = useUsers(userParams);
+
+  const { data: departmentsData } = useDepartments({ all: true });
+  const { data: yearsData } = useAvailableYears();
+
+  const users = usersData?.users || [];
+  const total = usersData?.total || 0;
+  const departments = departmentsData?.departments || [];
+  const years = yearsData?.years || [];
+  const loading = isLoadingUsers;
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -202,11 +180,8 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
     setEditDialogOpen(true);
   };
 
-  const handleEditSuccess = (updatedUser: User) => {
-    // Update the user in local state instead of re-fetching
-    setUsers(prevUsers =>
-      prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u))
-    );
+  const handleEditSuccess = () => {
+    // React Query will automatically refetch and update the cache
     setEditDialogOpen(false);
     setEditDialogUser(null);
   };
@@ -217,11 +192,7 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
   };
 
   const handleDeleteSuccess = () => {
-    if (deleteDialogUser) {
-      // Remove the deleted user from local state instead of re-fetching
-      setUsers(prevUsers => prevUsers.filter(u => u.id !== deleteDialogUser.id));
-      setTotal(prevTotal => prevTotal - 1);
-    }
+    // React Query will automatically refetch and update the cache
     setDeleteDialogOpen(false);
     setDeleteDialogUser(null);
   };
@@ -299,7 +270,18 @@ export function TeamMembersTable({ refreshTrigger, currentUserRole }: Readonly<T
                 </TableCell>
               </TableRow>
             )}
-            {!loading && users.length === 0 && (
+            {usersError && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md inline-block">
+                    {usersError instanceof Error
+                      ? usersError.message
+                      : 'Failed to load members'}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading && !usersError && users.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No members found matching your filters
