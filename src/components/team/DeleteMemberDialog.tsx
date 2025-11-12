@@ -18,8 +18,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { apiClient } from '@/lib/api-client';
-import type { User, DeleteUserResponse } from '@/types/team';
+import { useDeleteUser } from '@/hooks/use-users';
+import type { User } from '@/types/team';
 
 interface DeleteMemberDialogProps {
   user: User;
@@ -34,31 +34,25 @@ export function DeleteMemberDialog({
   onSuccess,
   open: controlledOpen,
   onOpenChange,
-  children
+  children,
 }: Readonly<DeleteMemberDialogProps>) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Use controlled or uncontrolled state
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
 
-  const handleDelete = async () => {
-    setError(null);
-    setLoading(true);
+  const deleteUserMutation = useDeleteUser();
 
+  const handleDelete = async () => {
     try {
-      await apiClient.deleteUser(user.id) as DeleteUserResponse;
+      await deleteUserMutation.mutateAsync(user.id);
 
       setOpen(false);
       onSuccess?.();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete user';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -88,9 +82,11 @@ export function DeleteMemberDialog({
         </DialogHeader>
 
         <div className="space-y-3 py-4">
-          {error && (
+          {deleteUserMutation.isError && (
             <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-              {error}
+              {deleteUserMutation.error instanceof Error
+                ? deleteUserMutation.error.message
+                : 'Failed to delete user'}
             </div>
           )}
 
@@ -117,7 +113,7 @@ export function DeleteMemberDialog({
             type="button"
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={loading}
+            disabled={deleteUserMutation.isPending}
           >
             Cancel
           </Button>
@@ -125,9 +121,9 @@ export function DeleteMemberDialog({
             type="button"
             variant="destructive"
             onClick={handleDelete}
-            disabled={loading}
+            disabled={deleteUserMutation.isPending}
           >
-            {loading ? 'Deleting...' : 'Delete Member'}
+            {deleteUserMutation.isPending ? 'Deleting...' : 'Delete Member'}
           </Button>
         </DialogFooter>
       </DialogContent>

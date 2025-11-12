@@ -26,13 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { apiClient } from '@/lib/api-client';
-import type { User, Department, DepartmentListResponse, UserRole, UpdateUserRequest } from '@/types/team';
+import { useUpdateUser, useDepartments } from '@/hooks/use-users';
+import type { User, UserRole, UpdateUserRequest } from '@/types/team';
 
 interface EditMemberDialogProps {
   user: User;
   currentUserRole: UserRole;
-  onSuccess?: (updatedUser: User) => void;
+  onSuccess?: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   children?: React.ReactNode;
@@ -44,11 +44,9 @@ export function EditMemberDialog({
   onSuccess,
   open: controlledOpen,
   onOpenChange,
-  children
+  children,
 }: Readonly<EditMemberDialogProps>) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [formData, setFormData] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
@@ -57,7 +55,6 @@ export function EditMemberDialog({
     departmentId: user.departmentId || 'none',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
 
   // Use controlled or uncontrolled state
   const isControlled = controlledOpen !== undefined;
@@ -69,11 +66,14 @@ export function EditMemberDialog({
   const canEditRole = isCoPresident && user.role !== 'co_president';
   const canEditDepartment = isCoPresident;
 
-  // Load departments when dialog opens
+  const updateUserMutation = useUpdateUser();
+  const { data: departmentsData } = useDepartments({ all: false });
+
+  const departments = departmentsData?.departments || [];
+
+  // Reset form data when dialog opens
   useEffect(() => {
     if (open) {
-      loadDepartments();
-      // Reset form data when opening
       setFormData({
         firstName: user.firstName,
         lastName: user.lastName,
@@ -82,19 +82,8 @@ export function EditMemberDialog({
         departmentId: user.departmentId || 'none',
       });
       setErrors({});
-      setError(null);
     }
   }, [open, user]);
-
-  const loadDepartments = async () => {
-    try {
-      const response = await apiClient.getDepartments({ all: false }) as DepartmentListResponse;
-      setDepartments(response.departments || []);
-    } catch (err) {
-      console.error('Failed to load departments:', err);
-      setError('Failed to load departments');
-    }
-  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -128,49 +117,44 @@ export function EditMemberDialog({
       return;
     }
 
-    setError(null);
-    setLoading(true);
+    // Build update request with only changed fields
+    const updateData: UpdateUserRequest = {};
+
+    if (formData.firstName !== user.firstName) {
+      updateData.firstName = formData.firstName;
+    }
+    if (formData.lastName !== user.lastName) {
+      updateData.lastName = formData.lastName;
+    }
+    if (formData.displayRole !== user.displayRole) {
+      updateData.displayRole = formData.displayRole;
+    }
+    if (canEditRole && formData.role !== user.role) {
+      updateData.role = formData.role;
+    }
+    if (canEditDepartment) {
+      const newDeptId = formData.departmentId === 'none' ? undefined : formData.departmentId;
+      const currentDeptId = user.departmentId || undefined;
+      if (newDeptId !== currentDeptId) {
+        updateData.departmentId = newDeptId;
+      }
+    }
+
+    // Check if anything changed
+    if (Object.keys(updateData).length === 0) {
+      return;
+    }
 
     try {
-      // Build update request with only changed fields
-      const updateData: UpdateUserRequest = {};
-
-      if (formData.firstName !== user.firstName) {
-        updateData.firstName = formData.firstName;
-      }
-      if (formData.lastName !== user.lastName) {
-        updateData.lastName = formData.lastName;
-      }
-      if (formData.displayRole !== user.displayRole) {
-        updateData.displayRole = formData.displayRole;
-      }
-      if (canEditRole && formData.role !== user.role) {
-        updateData.role = formData.role;
-      }
-      if (canEditDepartment) {
-        const newDeptId = formData.departmentId === 'none' ? undefined : formData.departmentId;
-        const currentDeptId = user.departmentId || undefined;
-        if (newDeptId !== currentDeptId) {
-          updateData.departmentId = newDeptId;
-        }
-      }
-
-      // Check if anything changed
-      if (Object.keys(updateData).length === 0) {
-        setError('No changes to save');
-        setLoading(false);
-        return;
-      }
-
-      const updatedUser = await apiClient.updateUser(user.id, updateData) as User;
+      await updateUserMutation.mutateAsync({
+        userId: user.id,
+        data: updateData,
+      });
 
       setOpen(false);
-      onSuccess?.(updatedUser);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+      onSuccess?.();
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -195,9 +179,11 @@ export function EditMemberDialog({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            {error && (
+            {updateUserMutation.isError && (
               <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
+                {updateUserMutation.error instanceof Error
+                  ? updateUserMutation.error.message
+                  : 'Failed to update user'}
               </div>
             )}
 
@@ -311,12 +297,12 @@ export function EditMemberDialog({
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={updateUserMutation.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+            <Button type="submit" disabled={updateUserMutation.isPending}>
+              {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

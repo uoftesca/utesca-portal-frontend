@@ -27,8 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { apiClient } from '@/lib/api-client';
-import type { Department, DepartmentListResponse, InviteUserRequest, UserRole } from '@/types/team';
+import { useInviteUser, useDepartments } from '@/hooks/use-users';
+import type { InviteUserRequest, UserRole } from '@/types/team';
 
 interface OnboardMemberDialogProps {
   onSuccess?: () => void;
@@ -36,8 +36,6 @@ interface OnboardMemberDialogProps {
 
 export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogProps>) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [formData, setFormData] = useState<InviteUserRequest>({
     email: '',
     firstName: '',
@@ -46,44 +44,15 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
     displayRole: '',
     departmentId: undefined,
   });
-  const [error, setError] = useState<string | null>(null);
 
-  // Load departments when dialog opens
+  const inviteUserMutation = useInviteUser();
+  const { data: departmentsData } = useDepartments({ all: false });
+
+  const departments = departmentsData?.departments || [];
+
+  // Reset form when dialog closes
   useEffect(() => {
-    if (open) {
-      loadDepartments();
-    } else {
-      // Clear errors when dialog closes
-      setError(null);
-    }
-  }, [open]);
-
-  const loadDepartments = async () => {
-    try {
-      const response = await apiClient.getDepartments({ all: false }) as DepartmentListResponse;
-      setDepartments(response.departments || []);
-    } catch (err) {
-      console.error('Failed to load departments:', err);
-      setError('Failed to load departments');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Check if department is selected (Select component doesn't support required attribute)
-    if (!formData.departmentId) {
-      setError('Please select a department');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await apiClient.inviteUser(formData);
-
-      // Reset form
+    if (!open) {
       setFormData({
         email: '',
         firstName: '',
@@ -92,14 +61,24 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
         displayRole: '',
         departmentId: undefined,
       });
+    }
+  }, [open]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Check if department is selected (Select component doesn't support required attribute)
+    if (!formData.departmentId) {
+      return;
+    }
+
+    try {
+      await inviteUserMutation.mutateAsync(formData);
 
       setOpen(false);
       onSuccess?.();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to invite user';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Error is handled by React Query and displayed below
     }
   };
 
@@ -122,9 +101,16 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            {error && (
+            {!formData.departmentId && inviteUserMutation.isError && (
               <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
+                Please select a department
+              </div>
+            )}
+            {inviteUserMutation.isError && formData.departmentId && (
+              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+                {inviteUserMutation.error instanceof Error
+                  ? inviteUserMutation.error.message
+                  : 'Failed to invite user'}
               </div>
             )}
 
@@ -234,12 +220,14 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={inviteUserMutation.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Sending Invitation...' : 'Send Invitation'}
+            <Button type="submit" disabled={inviteUserMutation.isPending}>
+              {inviteUserMutation.isPending
+                ? 'Sending Invitation...'
+                : 'Send Invitation'}
             </Button>
           </DialogFooter>
         </form>
