@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { TeamManagementDashboard } from '@/components/team';
+import { EventsManagementDashboard, EventDetailsDialog } from '@/components/events';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,7 +76,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  // Get event ID from URL query params
+  const eventId = searchParams.get('event');
 
   useEffect(() => {
     const getUser = async () => {
@@ -122,6 +127,23 @@ export default function DashboardPage() {
     router.refresh();
   };
 
+  // Handle opening event modal by adding event ID to URL
+  const handleEventClick = (eventId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('event', eventId);
+    router.push(`/?${params.toString()}`);
+  };
+
+  // Handle closing event modal by removing event ID from URL
+  const handleEventModalClose = (open: boolean) => {
+    if (!open) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('event');
+      const queryString = params.toString();
+      router.push(queryString ? `/?${queryString}` : '/');
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -161,16 +183,10 @@ export default function DashboardPage() {
         );
       case 'events':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle>All Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                All events content will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
+          <EventsManagementDashboard
+            userRole={userProfile?.role}
+            onEventClick={handleEventClick}
+          />
         );
       case 'team-management':
         return (
@@ -376,6 +392,19 @@ export default function DashboardPage() {
           {renderTabContent()}
         </div>
       </SidebarInset>
+
+      {/* Event Details Dialog - controlled by URL */}
+      <EventDetailsDialog
+        eventId={eventId}
+        userRole={userProfile?.role}
+        open={!!eventId}
+        onOpenChange={handleEventModalClose}
+        onSuccess={() => {
+          // Trigger refresh of events list by re-mounting the component
+          // The EventsManagementDashboard will reload events on mount
+          handleEventModalClose(false);
+        }}
+      />
     </SidebarProvider>
   );
 }

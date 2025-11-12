@@ -36,9 +36,40 @@ export interface CreateEventRequest extends BaseEventFields {
 export type UpdateEventRequest = Partial<CreateEventRequest>;
 
 /**
+ * Complete event object matching backend EventResponse
+ */
+export interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  dateTime: string;
+  location: string | null;
+  registrationDeadline: string | null;
+  status: EventStatus;
+  createdBy: string | null;
+  registrationFormSchema: Record<string, unknown> | null;
+  maxCapacity: number | null;
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  category: string | null;
+  imagePosition: string | null;
+  albumLink: string | null;
+  registrationLink: string | null;
+}
+
+/**
+ * Response type for listing events
+ */
+export interface EventListResponse {
+  events: Event[];
+}
+
+/**
  * Query parameters for getting events
  */
 export interface GetEventsParams {
   status?: EventStatus;
 }
-
