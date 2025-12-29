@@ -15,6 +15,7 @@ import { Event } from "@/types/event";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
+import { formatInTorontoTime } from "@/lib/timezone";
 
 interface EventCardProps {
   event: Event;
@@ -24,20 +25,9 @@ interface EventCardProps {
 export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
   const [imageError, setImageError] = useState(false);
 
-  // Format date/time for display with timezone
+  // Format date/time for display in Toronto timezone
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      timeZone: userTimezone,
-      timeZoneName: "short",
-    });
+    return formatInTorontoTime(dateTime, "MMM d, yyyy h:mm a zzz");
   };
 
   // Truncate description to 2-3 lines (approximately 120 characters)

@@ -34,6 +34,7 @@ import { useEvent, useUpdateEvent } from '@/hooks/use-events';
 import { DeleteEventDialog } from './DeleteEventDialog';
 import type { UpdateEventRequest, EventStatus } from '@/types/event';
 import type { UserRole } from '@/types/team';
+import { formatInTorontoTime, formatForDateTimeInput, convertTorontoTimeToUTC } from '@/lib/timezone';
 
 interface EventDetailsDialogProps {
   eventId: string | null;
@@ -44,10 +45,9 @@ interface EventDetailsDialogProps {
 }
 
 // Helper to convert datetime-local to ISO 8601 string
+// The datetime-local input is interpreted as Toronto time
 const convertToISO = (localDateTime: string): string => {
-  if (!localDateTime) return '';
-  const date = new Date(localDateTime);
-  return date.toISOString();
+  return convertTorontoTimeToUTC(localDateTime);
 };
 
 // Helper to clean form data for API request
@@ -101,9 +101,9 @@ export function EventDetailsDialog({
       setFormData({
         title: event.title,
         description: event.description || '',
-        dateTime: event.dateTime,
+        dateTime: formatForDateTimeInput(event.dateTime),
         location: event.location || '',
-        registrationDeadline: event.registrationDeadline || '',
+        registrationDeadline: formatForDateTimeInput(event.registrationDeadline),
         status: event.status,
         maxCapacity: event.maxCapacity || undefined,
         imageUrl: event.imageUrl || '',
@@ -146,33 +146,9 @@ export function EventDetailsDialog({
     onSuccess?.();
   };
 
-  // Format date for display with timezone
+  // Format date for display in Toronto timezone
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZone: userTimezone,
-      timeZoneName: 'short',
-    });
-  };
-
-  // Format datetime for input field
-  const formatDateTimeForInput = (dateTime: string | null) => {
-    if (!dateTime) return '';
-    const date = new Date(dateTime);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return formatInTorontoTime(dateTime, "EEEE, MMMM d, yyyy 'at' h:mm a zzz");
   };
 
   // Get status badge
@@ -289,7 +265,7 @@ export function EventDetailsDialog({
                   <Input
                     id="edit-dateTime"
                     type="datetime-local"
-                    value={formatDateTimeForInput(formData.dateTime || null)}
+                    value={formData.dateTime || ''}
                     onChange={(e) =>
                       setFormData({ ...formData, dateTime: e.target.value })
                     }
@@ -305,7 +281,7 @@ export function EventDetailsDialog({
                   <Input
                     id="edit-registrationDeadline"
                     type="datetime-local"
-                    value={formatDateTimeForInput(formData.registrationDeadline || null)}
+                    value={formData.registrationDeadline || ''}
                     onChange={(e) =>
                       setFormData({ ...formData, registrationDeadline: e.target.value })
                     }

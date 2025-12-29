@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useDeleteEvent } from '@/hooks/use-events';
 import type { Event } from '@/types/event';
+import { formatInTorontoTime } from '@/lib/timezone';
 
 interface DeleteEventDialogProps {
   event: Event;
@@ -56,16 +57,9 @@ export function DeleteEventDialog({
     }
   };
 
-  // Format date for display
+  // Format date for display in Toronto timezone
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+    return formatInTorontoTime(dateTime, "MMMM d, yyyy 'at' h:mm a");
   };
 
   return (
