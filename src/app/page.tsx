@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { TeamManagementDashboard } from '@/components/team';
 import { EventsManagementDashboard, EventDetailsDialog } from '@/components/events';
+import { ApplicationsDashboard } from '@/components/events/registrations';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +43,6 @@ import {
   Home,
   Calendar,
   Users,
-  FileText,
   Image,
   Bell,
   BarChart3,
@@ -64,7 +64,6 @@ const menuItems: MenuItem[] = [
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'team-management', label: 'Team Management', icon: Users },
   { id: 'photos', label: 'Photos', icon: Image },
-  { id: 'applications', label: 'Applications', icon: FileText },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'system-settings', label: 'System Settings', icon: Settings },
   { id: 'my-profile', label: 'My Profile', icon: UserCircle },
@@ -79,8 +78,9 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  // Get event ID from URL query params
+  // Get event ID and view from URL query params
   const eventId = searchParams.get('event');
+  const view = searchParams.get('view');
 
   useEffect(() => {
     const getUser = async () => {
@@ -121,10 +121,23 @@ function DashboardContent() {
     getUser();
   }, [supabase.auth]);
 
+  // Update active tab when viewing applications
+  useEffect(() => {
+    if (eventId && view === 'applications') {
+      setActiveTab('events');
+    }
+  }, [eventId, view]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/sign-in');
     router.refresh();
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    // Clear URL parameters when switching tabs
+    router.push('/');
   };
 
   // Handle opening event modal by adding event ID to URL
@@ -143,6 +156,7 @@ function DashboardContent() {
       router.push(queryString ? `/?${queryString}` : '/');
     }
   };
+
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -191,19 +205,6 @@ function DashboardContent() {
       case 'team-management':
         return (
           <TeamManagementDashboard userRole={userProfile?.role} />
-        );
-      case 'applications':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Applications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Applications content will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
         );
       case 'photos':
         return (
@@ -306,7 +307,7 @@ function DashboardContent() {
                   return (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton
-                        onClick={() => setActiveTab(item.id)}
+                        onClick={() => handleTabChange(item.id)}
                         isActive={activeTab === item.id}
                       >
                         <Icon className="h-5 w-5" />
@@ -368,14 +369,14 @@ function DashboardContent() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setActiveTab('dashboard');
+                    handleTabChange('dashboard');
                   }}
                   className="cursor-pointer hover:text-foreground"
                 >
                   Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {activeTab !== 'dashboard' && (
+              {activeTab !== 'dashboard' && view !== 'applications' && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
@@ -385,11 +386,39 @@ function DashboardContent() {
                   </BreadcrumbItem>
                 </>
               )}
+              {eventId && view === 'applications' && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleTabChange('events');
+                      }}
+                      className="cursor-pointer hover:text-foreground"
+                    >
+                      Events
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Event Registrations</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-8">
-          {renderTabContent()}
+          {eventId && view === 'applications' ? (
+            <ApplicationsDashboard
+              eventId={eventId}
+              userRole={userProfile?.role}
+            />
+          ) : (
+            renderTabContent()
+          )}
         </div>
       </SidebarInset>
 
@@ -397,7 +426,7 @@ function DashboardContent() {
       <EventDetailsDialog
         eventId={eventId}
         userRole={userProfile?.role}
-        open={!!eventId}
+        open={!!eventId && view !== 'applications'}
         onOpenChange={handleEventModalClose}
         onSuccess={() => {
           // Events will automatically refresh via React Query cache invalidation

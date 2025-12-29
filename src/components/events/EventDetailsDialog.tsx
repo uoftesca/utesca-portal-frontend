@@ -9,7 +9,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Edit, Trash2, Calendar, MapPin, Users, ExternalLink } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Edit, Trash2, Calendar, MapPin, Users, ExternalLink, FileText } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -83,6 +84,9 @@ export function EventDetailsDialog({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // Determine if user can edit (VPs and Co-presidents)
   const canEdit = userRole === 'vp' || userRole === 'co_president';
 
@@ -144,6 +148,12 @@ export function EventDetailsDialog({
   const handleDelete = () => {
     onOpenChange(false);
     onSuccess?.();
+  };
+
+  const handleViewApplications = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('view', 'applications');
+    router.push(`/?${params.toString()}`);
   };
 
   // Format date for display in Toronto timezone
@@ -530,14 +540,24 @@ export function EventDetailsDialog({
           ) : (
             <>
               {canEdit && (
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditMode(true)}
-                  className="gap-2"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditMode(true)}
+                    className="gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleViewApplications}
+                    className="gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    View Applications
+                  </Button>
+                </>
               )}
               <Button onClick={() => onOpenChange(false)} className="ml-auto">
                 Close

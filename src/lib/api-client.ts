@@ -16,6 +16,11 @@ import {
   UpdateUserRequest,
   GetDepartmentsParams,
 } from '@/types/team';
+import {
+  GetRegistrationsParams,
+  RegistrationStatusUpdate,
+  RegistrationStatus,
+} from '@/types/registration';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
 
@@ -152,5 +157,59 @@ export const apiClient = {
     return apiRequest(`/events/${eventId}`, {
       method: 'DELETE',
     });
+  },
+
+  // Event Registrations
+  getEventRegistrations: async (params: GetRegistrationsParams) => {
+    const query = new URLSearchParams();
+    if (params.status) query.append('status', params.status);
+    if (params.page) query.append('page', params.page.toString());
+    if (params.limit) query.append('limit', params.limit.toString());
+    if (params.search) query.append('search', params.search);
+
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return apiRequest(
+      `/portal/events/${params.eventId}/registrations${queryString}`
+    );
+  },
+
+  getRegistrationDetail: async (registrationId: string) => {
+    return apiRequest(`/portal/registrations/${registrationId}`);
+  },
+
+  updateRegistrationStatus: async (
+    registrationId: string,
+    data: RegistrationStatusUpdate
+  ) => {
+    return apiRequest(`/portal/registrations/${registrationId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  exportRegistrations: async (eventId: string, status?: RegistrationStatus) => {
+    const query = new URLSearchParams();
+    if (status) query.append('status', status);
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+
+    const token = await getAccessToken();
+    if (!token) {
+      throw new Error('No access token available. Please sign in.');
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/portal/events/${eventId}/registrations/export${queryString}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to export registrations: ${response.status}`);
+    }
+
+    return response.blob();
   },
 };
