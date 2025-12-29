@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ApplicationRowActions } from './ApplicationRowActions';
 import { extractName, extractEmail } from '@/lib/schema-utils';
+import { getStatusVariant, formatStatus } from '@/lib/status-utils';
 import type { Registration } from '@/types/registration';
 import type { UserRole } from '@/types/user';
 
@@ -41,27 +42,6 @@ export function ApplicationsTable({
   onViewDetails,
   onStatusUpdate,
 }: Readonly<ApplicationsTableProps>) {
-  // Status badge variant mapping
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'submitted':
-        return 'default'; // Blue
-      case 'accepted':
-        return 'outline'; // Green border
-      case 'rejected':
-        return 'destructive'; // Red
-      case 'confirmed':
-        return 'secondary'; // Gray/Purple
-      default:
-        return 'default';
-    }
-  };
-
-  // Format status text for display
-  const formatStatus = (status: string): string => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
-
   // Loading state
   if (isLoading) {
     return (

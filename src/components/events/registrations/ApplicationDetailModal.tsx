@@ -24,6 +24,7 @@ import { useRegistration } from '@/hooks/use-registrations';
 import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { getFieldLabel } from '@/lib/schema-utils';
+import { getStatusVariant, formatStatus } from '@/lib/status-utils';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
 
@@ -48,22 +49,6 @@ export function ApplicationDetailModal({
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showActions = canEdit && registration?.status === 'submitted';
   const showRsvpLink = registration?.status === 'accepted' && registration.rsvpToken;
-
-  // Get status badge variant
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'submitted':
-        return 'default';
-      case 'accepted':
-        return 'outline';
-      case 'rejected':
-        return 'destructive';
-      case 'confirmed':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
 
   // Check if value is a file object (has fileUrl and fileName)
   const isFileObject = (value: unknown): boolean => {
@@ -140,7 +125,7 @@ export function ApplicationDetailModal({
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <Badge variant={getStatusVariant(registration.status)}>
-                  {registration.status}
+                  {formatStatus(registration.status)}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
                   Submitted {new Date(registration.submittedAt).toLocaleString()}
