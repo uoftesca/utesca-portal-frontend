@@ -163,27 +163,29 @@ export function ApplicationDetailModal({
             {/* Form Data */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Form Responses</h3>
-              {Object.entries(registration.formData)
-                .filter(([, value]) => !isFileObject(value))
-                .map(([key, value]) => {
-                  const displayValue = formatFieldValue(value);
-                  const isLongText = typeof value === 'string' && value.length > 100;
+              {Object.entries(registration.formData).map(([key, value]) => {
+                const isFile = isFileObject(value);
+                const displayValue = isFile
+                  ? (value as { fileName: string }).fileName
+                  : formatFieldValue(value);
+                const isLongText =
+                  !isFile && typeof value === 'string' && value.length > 100;
 
-                  return (
-                    <div key={key} className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {getFieldLabel(schema, key)}
-                      </p>
-                      {isLongText ? (
-                        <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
-                          {displayValue}
-                        </div>
-                      ) : (
-                        <p className="text-sm">{displayValue}</p>
-                      )}
-                    </div>
-                  );
-                })}
+                return (
+                  <div key={key} className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {getFieldLabel(schema, key)}
+                    </p>
+                    {isLongText ? (
+                      <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
+                        {displayValue}
+                      </div>
+                    ) : (
+                      <p className="text-sm">{displayValue}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Uploaded Files */}
