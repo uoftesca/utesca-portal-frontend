@@ -133,7 +133,11 @@ export function ApplicationsTable({
             );
 
             return (
-              <TableRow key={registration.id} className="hover:bg-muted/50">
+              <TableRow
+                key={registration.id}
+                className="hover:bg-muted/50 cursor-pointer"
+                onClick={() => onViewDetails(registration.id)}
+              >
                 <TableCell className="font-medium">{name}</TableCell>
                 <TableCell className="text-muted-foreground">{email}</TableCell>
                 <TableCell className="text-sm">{appliedAt}</TableCell>
@@ -142,7 +146,7 @@ export function ApplicationsTable({
                     {formatStatus(registration.status)}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <ApplicationRowActions
                     registration={registration}
                     userRole={userRole}
