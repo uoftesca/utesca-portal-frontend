@@ -43,7 +43,6 @@ import {
   Home,
   Calendar,
   Users,
-  Image,
   Bell,
   BarChart3,
   Settings,
@@ -63,7 +62,6 @@ const menuItems: MenuItem[] = [
   { id: 'announcements', label: 'Announcements', icon: Bell },
   { id: 'events', label: 'Events', icon: Calendar },
   { id: 'team-management', label: 'Team Management', icon: Users },
-  { id: 'photos', label: 'Photos', icon: Image },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'system-settings', label: 'System Settings', icon: Settings },
   { id: 'my-profile', label: 'My Profile', icon: UserCircle },
@@ -205,19 +203,6 @@ function DashboardContent() {
       case 'team-management':
         return (
           <TeamManagementDashboard userRole={userProfile?.role} />
-        );
-      case 'photos':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Photos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Photos content will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
         );
       case 'announcements':
         return (
