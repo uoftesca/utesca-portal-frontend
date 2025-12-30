@@ -166,25 +166,25 @@ export function EventDetailsDialog({
     switch (status) {
       case 'published':
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge variant="success">
             Published
           </Badge>
         );
       case 'pending_approval':
         return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          <Badge className="bg-yellow-500/15 text-yellow-700">
             Pending Approval
           </Badge>
         );
       case 'sent_back':
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge className="bg-red-500/15 text-red-700">
             Sent Back
           </Badge>
         );
       case 'draft':
         return (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+          <Badge className="bg-gray-500/15 text-gray-700">
             Draft
           </Badge>
         );
