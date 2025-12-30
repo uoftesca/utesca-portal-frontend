@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ApplicationRowActions } from './ApplicationRowActions';
 import { extractName, extractEmail } from '@/lib/schema-utils';
 import { getStatusVariant, formatStatus } from '@/lib/status-utils';
+import { formatInTorontoTime } from '@/lib/timezone';
 import type { Registration } from '@/types/registration';
 import type { UserRole } from '@/types/user';
 
@@ -126,17 +127,9 @@ export function ApplicationsTable({
           {registrations.map((registration) => {
             const name = extractName(registration.formData);
             const email = extractEmail(registration.formData);
-            const submittedDate = new Date(registration.submittedAt);
-            const appliedAt = submittedDate.toLocaleString(
-              undefined,
-              {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                timeZoneName: 'short',
-              }
+            const appliedAt = formatInTorontoTime(
+              registration.submittedAt,
+              'MMM d, yyyy h:mm a zzz'
             );
 
             return (

@@ -25,6 +25,7 @@ import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { getFieldLabel } from '@/lib/schema-utils';
 import { getStatusVariant, formatStatus } from '@/lib/status-utils';
+import { formatInTorontoTime } from '@/lib/timezone';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
 
@@ -128,16 +129,16 @@ export function ApplicationDetailModal({
                   {formatStatus(registration.status)}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
-                  Submitted {new Date(registration.submittedAt).toLocaleString()}
+                  Submitted @ {formatInTorontoTime(registration.submittedAt, 'MMM d, yyyy h:mm a zzz')}
                 </p>
                 {registration.reviewedAt && registration.reviewedBy && (
                   <p className="text-sm text-muted-foreground">
-                    Reviewed {new Date(registration.reviewedAt).toLocaleString()}
+                    Reviewed @ {formatInTorontoTime(registration.reviewedAt, 'MMM d, yyyy h:mm a zzz')}
                   </p>
                 )}
                 {registration.confirmedAt && (
                   <p className="text-sm text-muted-foreground">
-                    Confirmed {new Date(registration.confirmedAt).toLocaleString()}
+                    Confirmed @ {formatInTorontoTime(registration.confirmedAt, 'MMM d, yyyy h:mm a zzz')}
                   </p>
                 )}
               </div>
