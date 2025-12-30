@@ -178,7 +178,7 @@ export function EventDetailsDialog({
         );
       case 'sent_back':
         return (
-          <Badge className="bg-red-500/15 text-red-700">
+          <Badge variant="destructive">
             Sent Back
           </Badge>
         );
