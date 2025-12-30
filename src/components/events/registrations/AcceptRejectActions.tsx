@@ -68,9 +68,9 @@ export function AcceptRejectActions({
           onClick={handleAccept}
           disabled={updateStatus.isPending}
           size={buttonSize}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-emerald-600 hover:bg-emerald-700"
         >
-          <Check className="h-4 w-4 mr-1" />
+          <Check className="h-4 w-4" />
           Accept
         </Button>
         <Button
@@ -79,7 +79,7 @@ export function AcceptRejectActions({
           variant="destructive"
           size={buttonSize}
         >
-          <X className="h-4 w-4 mr-1" />
+          <X className="h-4 w-4" />
           Reject
         </Button>
       </div>
