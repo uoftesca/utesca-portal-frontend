@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -23,8 +22,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRegistration } from '@/hooks/use-registrations';
 import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
+import { RegistrationStatusBadge } from './RegistrationStatusBadge';
 import { getFieldLabel } from '@/lib/schema-utils';
-import { getStatusVariant, formatStatus } from '@/lib/status-utils';
 import { formatInTorontoTime } from '@/lib/timezone';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
@@ -125,9 +124,7 @@ export function ApplicationDetailModal({
             {/* Status and Metadata */}
             <div className="flex items-start justify-between">
               <div className="space-y-1">
-                <Badge variant={getStatusVariant(registration.status)}>
-                  {formatStatus(registration.status)}
-                </Badge>
+                <RegistrationStatusBadge status={registration.status} />
                 <p className="text-sm text-muted-foreground">
                   Submitted @ {formatInTorontoTime(registration.submittedAt, 'MMM d, yyyy h:mm a zzz')}
                 </p>

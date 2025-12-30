@@ -1,14 +1,16 @@
 /**
- * Status Utility Functions
+ * Registration Status Utility Functions
  *
- * Shared utilities for registration status handling and display
+ * Shared utilities for event registration status handling and display
  */
+
+import type { RegistrationStatus } from '@/types/registration';
 
 /**
  * Get badge variant for event registration status
  */
-export function getStatusVariant(
-  status: string
+export function getRegistrationStatusVariant(
+  status: RegistrationStatus
 ): 'default' | 'outline' | 'destructive' | 'secondary' | 'success' {
   switch (status) {
     case 'submitted':
@@ -25,8 +27,8 @@ export function getStatusVariant(
 }
 
 /**
- * Format status string for display (capitalize first letter)
+ * Format registration status string for display
  */
-export function formatStatus(status: string): string {
+export function formatRegistrationStatus(status: RegistrationStatus): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }

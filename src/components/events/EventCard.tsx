@@ -13,7 +13,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Event } from "@/types/event";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { EventStatusBadge } from "./EventStatusBadge";
 import { Calendar } from "lucide-react";
 import { formatInTorontoTime } from "@/lib/timezone";
 
@@ -36,32 +36,6 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
     const maxLength = 120;
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength).trim() + "...";
-  };
-
-  // Determine badge variant and label based on status
-  const getStatusBadge = () => {
-    switch (event.status) {
-      case "pending_approval":
-        return (
-          <Badge variant="outline" className="bg-yellow-700 text-yellow-50 border-yellow-200">
-            Pending Approval
-          </Badge>
-        );
-      case "sent_back":
-        return (
-          <Badge variant="outline" className="bg-red-700 text-red-50 border-red-200">
-            Sent Back
-          </Badge>
-        );
-      case "draft":
-        return (
-          <Badge variant="outline" className="bg-gray-700 text-gray-50 border-gray-200">
-            Draft
-          </Badge>
-        );
-      default:
-        return null;
-    }
   };
 
   return (
@@ -96,7 +70,11 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
           <Calendar className="w-3 h-3 mr-1" />
           {formatDateTime(event.dateTime)}
         </div>
-        <div>{getStatusBadge()}</div>
+        {event.status !== 'published' && (
+          <div>
+            <EventStatusBadge status={event.status} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -16,12 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ApplicationRowActions } from './ApplicationRowActions';
+import { RegistrationStatusBadge } from './RegistrationStatusBadge';
 import { extractName, extractEmail } from '@/lib/schema-utils';
-import { getStatusVariant, formatStatus } from '@/lib/status-utils';
 import { formatInTorontoTime } from '@/lib/timezone';
 import type { Registration } from '@/types/registration';
 import type { UserRole } from '@/types/user';
@@ -142,9 +141,7 @@ export function ApplicationsTable({
                 <TableCell className="text-muted-foreground">{email}</TableCell>
                 <TableCell className="text-sm">{appliedAt}</TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(registration.status)}>
-                    {formatStatus(registration.status)}
-                  </Badge>
+                  <RegistrationStatusBadge status={registration.status} />
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <ApplicationRowActions

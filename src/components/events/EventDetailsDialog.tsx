@@ -23,7 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -33,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { useEvent, useUpdateEvent } from '@/hooks/use-events';
 import { DeleteEventDialog } from './DeleteEventDialog';
+import { EventStatusBadge } from './EventStatusBadge';
 import type { UpdateEventRequest, EventStatus } from '@/types/event';
 import type { UserRole } from '@/types/team';
 import { formatInTorontoTime, formatForDateTimeInput, convertTorontoTimeToUTC } from '@/lib/timezone';
@@ -161,36 +161,6 @@ export function EventDetailsDialog({
     return formatInTorontoTime(dateTime, "EEEE, MMMM d, yyyy 'at' h:mm a zzz");
   };
 
-  // Get status badge
-  const getStatusBadge = (status: EventStatus) => {
-    switch (status) {
-      case 'published':
-        return (
-          <Badge variant="success">
-            Published
-          </Badge>
-        );
-      case 'pending_approval':
-        return (
-          <Badge className="bg-yellow-500/15 text-yellow-700">
-            Pending Approval
-          </Badge>
-        );
-      case 'sent_back':
-        return (
-          <Badge variant="destructive">
-            Sent Back
-          </Badge>
-        );
-      case 'draft':
-        return (
-          <Badge className="bg-gray-500/15 text-gray-700">
-            Draft
-          </Badge>
-        );
-    }
-  };
-
   // Render dialog content based on loading/error/event state
   const renderDialogContent = () => {
     if (loading && !event) {
@@ -236,7 +206,7 @@ export function EventDetailsDialog({
           </DialogTitle>
           {!isEditMode && (
             <DialogDescription className="mt-2">
-              {getStatusBadge(event.status)}
+              <EventStatusBadge status={event.status} />
             </DialogDescription>
           )}
         </DialogHeader>
