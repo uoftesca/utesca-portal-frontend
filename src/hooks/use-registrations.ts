@@ -82,12 +82,18 @@ export function useRegistrationCounts(eventId: string) {
     status: 'confirmed',
     limit: 1,
   });
+  const { data: notAttending } = useRegistrations({
+    eventId,
+    status: 'not_attending',
+    limit: 1,
+  });
 
   const counts: StatusCounts = {
     submitted: submitted?.pagination.total || 0,
     accepted: accepted?.pagination.total || 0,
     rejected: rejected?.pagination.total || 0,
     confirmed: confirmed?.pagination.total || 0,
+    notAttending: notAttending?.pagination.total || 0,
   };
 
   return { data: counts };
@@ -143,14 +149,14 @@ export function useExportRegistrations() {
     },
     onSuccess: (blob, { eventId, status }) => {
       // Trigger download
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `registrations-${eventId}${status ? `-${status}` : ''}.csv`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      globalThis.URL.revokeObjectURL(url);
+      a.remove();
     },
   });
 }
