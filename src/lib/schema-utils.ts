@@ -25,25 +25,36 @@ export function getFieldLabel(
 /**
  * Extract name from form data (handles multiple field name patterns)
  *
- * Supports: full_name, fullName, firstName + lastName
+ * Supports: fullName, firstName + lastName
+ * Legacy support: full_name, first_name, last_name
  *
  * @param formData - The form submission data
  * @returns The extracted name or 'Unknown'
  */
 export function extractName(formData: Record<string, unknown>): string {
-  const fullName = formData.full_name;
-  const fullNameAlt = formData.fullName;
+  // Try camelCase (new standard)
+  const fullName = formData.fullName;
   const firstName = formData.firstName;
   const lastName = formData.lastName;
 
   if (typeof fullName === 'string' && fullName) return fullName;
-  if (typeof fullNameAlt === 'string' && fullNameAlt) return fullNameAlt;
 
+  // Try first + last name
   const first = typeof firstName === 'string' ? firstName : '';
   const last = typeof lastName === 'string' ? lastName : '';
   const combined = `${first} ${last}`.trim();
 
-  return combined || 'Unknown';
+  if (combined) return combined;
+
+  // Legacy fallback for snake_case
+  const legacyFullName = formData.full_name;
+  if (typeof legacyFullName === 'string' && legacyFullName) return legacyFullName;
+
+  const legacyFirst = typeof formData.first_name === 'string' ? formData.first_name : '';
+  const legacyLast = typeof formData.last_name === 'string' ? formData.last_name : '';
+  const legacyCombined = `${legacyFirst} ${legacyLast}`.trim();
+
+  return legacyCombined || 'Unknown';
 }
 
 /**
