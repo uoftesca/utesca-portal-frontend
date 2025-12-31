@@ -37,7 +37,6 @@ export interface Registration {
   submittedAt: string;
   reviewedBy: string | null;
   reviewedAt: string | null;
-  rsvpToken: string | null;
   confirmedAt: string | null;
   checkedIn: boolean;
   checkedInAt: string | null;

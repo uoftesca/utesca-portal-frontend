@@ -14,16 +14,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface RsvpLinkDisplayProps {
-  token: string;
+  id: string;
   baseUrl?: string;
 }
 
 export function RsvpLinkDisplay({
-  token,
+  id,
   baseUrl = 'https://utesca.ca',
 }: Readonly<RsvpLinkDisplayProps>) {
   const [copied, setCopied] = useState(false);
-  const rsvpUrl = `${baseUrl}/rsvp/${token}`;
+  const rsvpUrl = `${baseUrl}/rsvp/${id}`;
 
   const handleCopy = async () => {
     try {

@@ -48,7 +48,7 @@ export function ApplicationDetailModal({
   const registration = data?.registration;
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showActions = canEdit && registration?.status === 'submitted';
-  const showRsvpLink = registration?.status === 'accepted' && registration.rsvpToken;
+  const showRsvpLink = registration?.status === 'accepted';
 
   // Check if value is a file object (has fileUrl and fileName)
   const isFileObject = (value: unknown): boolean => {
@@ -212,7 +212,7 @@ export function ApplicationDetailModal({
             {showRsvpLink && (
               <>
                 <Separator />
-                <RsvpLinkDisplay token={registration.rsvpToken!} />
+                <RsvpLinkDisplay id={registration.id} />
               </>
             )}
           </div>

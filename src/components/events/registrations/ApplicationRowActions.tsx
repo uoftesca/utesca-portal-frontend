@@ -40,11 +40,10 @@ export function ApplicationRowActions({
 
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showAcceptReject = canEdit && registration.status === 'submitted';
-  const showCopyRsvp =
-    registration.status === 'accepted' && registration.rsvpToken;
+  const showCopyRsvp = registration.status === 'accepted';
 
   const handleCopyRsvp = async () => {
-    const rsvpUrl = `https://utesca.ca/rsvp/${registration.rsvpToken}`;
+    const rsvpUrl = `https://utesca.ca/rsvp/${registration.id}`;
     try {
       await navigator.clipboard.writeText(rsvpUrl);
       setCopySuccess(true);
