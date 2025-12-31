@@ -23,7 +23,6 @@ import { useRegistration } from '@/hooks/use-registrations';
 import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { RegistrationStatusBadge } from './RegistrationStatusBadge';
-import { getFieldLabel } from '@/lib/schema-utils';
 import { formatInTorontoTime } from '@/lib/timezone';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
@@ -146,29 +145,46 @@ export function ApplicationDetailModal({
             {/* Form Data */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Form Responses</h3>
-              {Object.entries(registration.formData).map(([key, value]) => {
-                const isFile = isFileObject(value);
-                const displayValue = isFile
-                  ? (value as { fileName: string }).fileName
-                  : formatFieldValue(value);
-                const isLongText =
-                  !isFile && typeof value === 'string' && value.length > 100;
+              {!schema ? (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    Form schema not available. Cannot display responses.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                schema.fields
+                  .map((field) => {
+                    const value = registration.formData[field.id];
 
-                return (
-                  <div key={key} className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {getFieldLabel(schema, key)}
-                    </p>
-                    {isLongText ? (
-                      <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
-                        {displayValue}
+                    // Skip empty optional fields
+                    if (value === undefined || value === null || value === '') {
+                      return null;
+                    }
+
+                    const isFile = isFileObject(value);
+                    const displayValue = isFile
+                      ? (value as { fileName: string }).fileName
+                      : formatFieldValue(value);
+                    const isLongText =
+                      !isFile && typeof value === 'string' && value.length > 100;
+
+                    return (
+                      <div key={field.id} className="space-y-1">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {field.label}
+                        </p>
+                        {isLongText ? (
+                          <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
+                            {displayValue}
+                          </div>
+                        ) : (
+                          <p className="text-sm">{displayValue}</p>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-sm">{displayValue}</p>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })
+                  .filter(Boolean)
+              )}
             </div>
 
             {/* Uploaded Files */}
