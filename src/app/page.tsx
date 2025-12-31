@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { TeamManagementDashboard } from '@/components/team';
 import { EventsManagementDashboard, EventDetailsDialog } from '@/components/events';
@@ -49,6 +48,7 @@ import {
   UserCircle,
   ChevronUp,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 
 type MenuItem = {
@@ -263,16 +263,8 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-2xl">
-          <CardHeader>
-            <Skeleton className="h-8 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4" />
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-accent to-[#2A3441]">
+        <Loader2 className="h-12 w-12 animate-spin text-white" />
       </div>
     );
   }
@@ -426,16 +418,8 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <Skeleton className="h-8 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4" />
-            </CardContent>
-          </Card>
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-accent to-[#2A3441]">
+          <Loader2 className="h-12 w-12 animate-spin text-white" />
         </div>
       }
     >
