@@ -56,7 +56,7 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
           />
         </div>
       ) : (
-        <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center rounded-t-xl">
+        <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-accent to-[#2A3441] flex items-center justify-center rounded-t-xl">
           <Calendar className="w-12 h-12 text-gray-500" />
         </div>
       )}
