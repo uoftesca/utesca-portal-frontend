@@ -99,7 +99,7 @@ export function ApplicationDetailModal({
         <DialogHeader>
           <DialogTitle>Application Details</DialogTitle>
           <DialogDescription>
-            View complete registration information and take action
+            View complete registration information and take action.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,22 +122,22 @@ export function ApplicationDetailModal({
         {registration && (
           <div className="space-y-6">
             {/* Status and Metadata */}
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <RegistrationStatusBadge status={registration.status} />
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Submitted @ {formatInTorontoTime(registration.submittedAt, 'MMM d, yyyy h:mm a zzz')}
+              </p>
+              {registration.reviewedAt && registration.reviewedBy && (
                 <p className="text-sm text-muted-foreground">
-                  Submitted @ {formatInTorontoTime(registration.submittedAt, 'MMM d, yyyy h:mm a zzz')}
+                  Reviewed @ {formatInTorontoTime(registration.reviewedAt, 'MMM d, yyyy h:mm a zzz')}
                 </p>
-                {registration.reviewedAt && registration.reviewedBy && (
-                  <p className="text-sm text-muted-foreground">
-                    Reviewed @ {formatInTorontoTime(registration.reviewedAt, 'MMM d, yyyy h:mm a zzz')}
-                  </p>
-                )}
+              )}
+              <div className="flex w-full items-start justify-between">
                 {registration.confirmedAt && (
                   <p className="text-sm text-muted-foreground">
                     Confirmed @ {formatInTorontoTime(registration.confirmedAt, 'MMM d, yyyy h:mm a zzz')}
                   </p>
                 )}
+                <RegistrationStatusBadge status={registration.status} />
               </div>
             </div>
 
