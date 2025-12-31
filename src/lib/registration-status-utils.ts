@@ -21,6 +21,8 @@ export function getRegistrationStatusVariant(
       return 'destructive';
     case 'confirmed':
       return 'success';
+    case 'not_attending':
+      return 'secondary';
     default:
       return 'default';
   }
@@ -30,5 +32,8 @@ export function getRegistrationStatusVariant(
  * Format registration status string for display
  */
 export function formatRegistrationStatus(status: RegistrationStatus): string {
+  if (status === 'not_attending') {
+    return 'Not Attending';
+  }
   return status.charAt(0).toUpperCase() + status.slice(1);
 }

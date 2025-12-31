@@ -30,7 +30,7 @@ export function StatusFilterCards({
   counts,
 }: Readonly<StatusFilterCardsProps>) {
   const totalCount =
-    counts.submitted + counts.accepted + counts.rejected + counts.confirmed;
+    counts.submitted + counts.accepted + counts.rejected + counts.confirmed + counts.notAttending;
 
   const statusCards: StatusCard[] = [
     { value: 'all', label: 'All', count: totalCount },
@@ -38,10 +38,11 @@ export function StatusFilterCards({
     { value: 'accepted', label: 'Accepted', count: counts.accepted },
     { value: 'rejected', label: 'Rejected', count: counts.rejected },
     { value: 'confirmed', label: 'Confirmed', count: counts.confirmed },
+    { value: 'not_attending', label: 'Not Attending', count: counts.notAttending },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
       {statusCards.map((card) => (
         <Card
           key={card.value}

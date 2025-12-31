@@ -5,7 +5,7 @@
  * from domains/events/registrations/models.py
  */
 
-export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed';
+export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending';
 
 /**
  * File metadata for uploaded files (resumes, etc.)
@@ -113,6 +113,7 @@ export interface StatusCounts {
   accepted: number;
   rejected: number;
   confirmed: number;
+  notAttending: number;
 }
 
 /**
