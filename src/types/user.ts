@@ -21,6 +21,7 @@ export interface UserProfile {
   departmentId: string | null;
   photoUrl: string | null;
   announcementEmailPreference: EmailNotificationPreference;
+  linkedinUrl: string | null;
   invitedBy: string | null;
   createdAt: string;
   updatedAt: string;
