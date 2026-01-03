@@ -38,6 +38,20 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
     return text.substring(0, maxLength).trim() + "...";
   };
 
+  // Get image positioning style
+  const getImageStyle = (position: string | null): React.CSSProperties => {
+    if (!position) return { objectPosition: 'center' };
+
+    // Check if position is a number (e.g., "-130")
+    const numericPosition = parseFloat(position);
+    if (!isNaN(numericPosition)) {
+      return { objectPosition: `center ${numericPosition}px` };
+    }
+
+    // For named positions, use inline style to avoid dynamic class issues
+    return { objectPosition: position };
+  };
+
   return (
     <Card
       className="cursor-pointer hover:shadow-lg transition-shadow duration-200 py-0 gap-0"
@@ -51,6 +65,7 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
             alt={event.title}
             fill
             className="object-cover"
+            style={getImageStyle(event.imagePosition)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImageError(true)}
           />
