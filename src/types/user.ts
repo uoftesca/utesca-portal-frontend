@@ -7,6 +7,18 @@ export type UserRole = 'co_president' | 'vp' | 'director';
 export type EmailNotificationPreference = 'all' | 'urgent_only' | 'none';
 
 /**
+ * Granular notification preferences stored as JSONB in database.
+ *
+ * Allows users to control which types of email notifications they receive.
+ * Role-agnostic: any user can opt-in to any notification type.
+ */
+export interface NotificationPreferences {
+  announcements: EmailNotificationPreference;
+  rsvpChanges: boolean;
+  newApplicationSubmitted: boolean;
+}
+
+/**
  * User profile type matching the backend /auth/me response
  */
 export interface UserProfile {
@@ -20,7 +32,7 @@ export interface UserProfile {
   displayRole: string;
   departmentId: string | null;
   photoUrl: string | null;
-  announcementEmailPreference: EmailNotificationPreference;
+  notificationPreferences: NotificationPreferences;
   invitedBy: string | null;
   createdAt: string;
   updatedAt: string;
