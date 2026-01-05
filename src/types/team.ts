@@ -38,6 +38,7 @@ export interface User {
   photoUrl: string | null;
   invitedBy: string | null;
   notificationPreferences: NotificationPreferences;
+  linkedinUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
