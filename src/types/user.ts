@@ -19,25 +19,10 @@ export interface NotificationPreferences {
 }
 
 /**
- * User profile type matching the backend /auth/me response
+ * Re-export User type from team.ts for convenience
+ * This represents user data from the backend (both /auth/me and team management endpoints)
  */
-export interface UserProfile {
-  id: string;
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  preferredName: string | null;
-  role: UserRole;
-  displayRole: string;
-  departmentId: string | null;
-  photoUrl: string | null;
-  notificationPreferences: NotificationPreferences;
-  linkedinUrl: string | null;
-  invitedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { User } from './team';
 
 /**
  * Query parameters for getting users

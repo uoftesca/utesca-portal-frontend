@@ -23,7 +23,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { User } from '@supabase/supabase-js';
-import { UserProfile } from '@/types/user';
+import { User as PortalUser } from '@/types/user';
 import {
   Sidebar,
   SidebarContent,
@@ -69,7 +69,7 @@ const menuItems: MenuItem[] = [
 
 function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<PortalUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const router = useRouter();
