@@ -33,6 +33,7 @@ export interface UserProfile {
   departmentId: string | null;
   photoUrl: string | null;
   notificationPreferences: NotificationPreferences;
+  linkedinUrl: string | null;
   invitedBy: string | null;
   createdAt: string;
   updatedAt: string;
