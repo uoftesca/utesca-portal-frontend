@@ -116,36 +116,44 @@ export function ApplicationDetailModal({
                   </AlertDescription>
                 </Alert>
               ) : (
-                schema.fields
-                  .map((field) => {
-                    const value = registration.formData[field.id];
-                    const metadata = getFieldValueMetadata(value);
+                schema.fields.map((field) => {
+                  const value = registration.formData[field.id];
+                  const metadata = getFieldValueMetadata(value);
 
-                    // Skip empty optional fields
-                    if (metadata.isEmpty) {
-                      return null;
-                    }
+                  let displayValue: string;
+                  if (metadata.isFile) {
+                    displayValue = (value as { fileName: string }).fileName;
+                  } else if (
+                    // For optional checkboxes, treat empty arrays or false as empty (show "—")
+                    field.type === 'checkbox' &&
+                    !field.required &&
+                    (value === false || (Array.isArray(value) && value.length === 0))
+                  ) {
+                    displayValue = '—';
+                  } else {
+                    displayValue = formatFieldValue(value); // Returns "—" for null/undefined
+                  }
 
-                    const displayValue = metadata.isFile
-                      ? (value as { fileName: string }).fileName
-                      : formatFieldValue(value);
-
-                    return (
-                      <div key={field.id} className="space-y-1">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          {field.label}
-                        </p>
-                        {metadata.isLongText ? (
-                          <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
-                            {displayValue}
-                          </div>
-                        ) : (
-                          <p className="text-sm">{displayValue}</p>
+                  return (
+                    <div key={field.id} className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {field.label}
+                        {!field.required && (
+                          <span className="text-xs ml-1 text-muted-foreground">
+                            (optional)
+                          </span>
                         )}
-                      </div>
-                    );
-                  })
-                  .filter(Boolean)
+                      </p>
+                      {metadata.isLongText ? (
+                        <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
+                          {displayValue}
+                        </div>
+                      ) : (
+                        <p className="text-sm">{displayValue}</p>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
 
