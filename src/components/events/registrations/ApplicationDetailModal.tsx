@@ -24,7 +24,7 @@ import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { RegistrationStatusBadge } from './RegistrationStatusBadge';
 import { formatInTorontoTime } from '@/lib/timezone';
-import { formatFieldValue, getFieldValueMetadata } from '@/lib/schema-utils';
+import { formatFieldValue, getFieldValueMetadata, extractName, extractEmail } from '@/lib/schema-utils';
 import { formatFileSize } from '@/lib/utils';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
@@ -32,6 +32,7 @@ import type { RegistrationFormSchema } from '@/types/registration';
 interface ApplicationDetailModalProps {
   registrationId: string | null;
   schema?: RegistrationFormSchema | null;
+  eventTitle?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userRole?: UserRole;
@@ -40,6 +41,7 @@ interface ApplicationDetailModalProps {
 export function ApplicationDetailModal({
   registrationId,
   schema,
+  eventTitle,
   open,
   onOpenChange,
   userRole,
@@ -50,6 +52,10 @@ export function ApplicationDetailModal({
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showActions = canEdit && registration?.status === 'submitted';
   const showRsvpLink = registration?.status === 'accepted';
+
+  // Extract applicant data for confirmation dialogs
+  const applicantName = registration ? extractName(registration.formData) : '';
+  const applicantEmail = registration ? extractEmail(registration.formData) : '';
 
   // Handle status update success
   const handleStatusUpdateSuccess = async () => {
@@ -208,6 +214,9 @@ export function ApplicationDetailModal({
           {showActions && registration && (
             <AcceptRejectActions
               registrationId={registration.id}
+              applicantName={applicantName}
+              applicantEmail={applicantEmail}
+              eventTitle={eventTitle || 'this event'}
               onSuccess={handleStatusUpdateSuccess}
             />
           )}

@@ -9,27 +9,27 @@
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useUpdateRegistrationStatus } from '@/hooks/use-registrations';
+import { ConfirmActionDialog } from './ConfirmActionDialog';
 
 interface AcceptRejectActionsProps {
   registrationId: string;
+  applicantName: string;
+  applicantEmail: string;
+  eventTitle: string;
   onSuccess?: (rsvpLink?: string) => void;
   variant?: 'default' | 'compact';
 }
 
 export function AcceptRejectActions({
   registrationId,
+  applicantName,
+  applicantEmail,
+  eventTitle,
   onSuccess,
   variant = 'default',
 }: Readonly<AcceptRejectActionsProps>) {
+  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const updateStatus = useUpdateRegistrationStatus();
 
@@ -39,6 +39,7 @@ export function AcceptRejectActions({
         registrationId,
         data: { status: 'accepted' },
       });
+      setShowAcceptDialog(false);
       onSuccess?.(result.rsvpLink);
     } catch (error) {
       // Error will be handled by React Query
@@ -65,7 +66,7 @@ export function AcceptRejectActions({
     <>
       <div className="flex items-center gap-2">
         <Button
-          onClick={handleAccept}
+          onClick={() => setShowAcceptDialog(true)}
           disabled={updateStatus.isPending}
           size={buttonSize}
           className="bg-emerald-600 hover:bg-emerald-700"
@@ -84,34 +85,29 @@ export function AcceptRejectActions({
         </Button>
       </div>
 
+      {/* Accept Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={showAcceptDialog}
+        onOpenChange={setShowAcceptDialog}
+        actionType="accept"
+        applicantName={applicantName}
+        applicantEmail={applicantEmail}
+        eventTitle={eventTitle}
+        onConfirm={handleAccept}
+        isPending={updateStatus.isPending}
+      />
+
       {/* Reject Confirmation Dialog */}
-      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Application?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to reject this application? This action
-              cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowRejectDialog(false)}
-              disabled={updateStatus.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleReject}
-              disabled={updateStatus.isPending}
-            >
-              {updateStatus.isPending ? 'Rejecting...' : 'Reject Application'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmActionDialog
+        open={showRejectDialog}
+        onOpenChange={setShowRejectDialog}
+        actionType="reject"
+        applicantName={applicantName}
+        applicantEmail={applicantEmail}
+        eventTitle={eventTitle}
+        onConfirm={handleReject}
+        isPending={updateStatus.isPending}
+      />
 
       {/* Error Display */}
       {updateStatus.isError && (

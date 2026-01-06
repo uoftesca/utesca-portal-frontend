@@ -150,6 +150,7 @@ export function ApplicationsDashboard({
         registrations={registrations}
         isLoading={isLoading}
         error={error}
+        eventTitle={event?.title}
         userRole={userRole}
         onViewDetails={handleCardClick}
         onStatusUpdate={handleStatusUpdate}
@@ -193,6 +194,7 @@ export function ApplicationsDashboard({
       <ApplicationDetailModal
         registrationId={selectedRegistrationId}
         schema={event?.registrationFormSchema || null}
+        eventTitle={event?.title}
         open={!!selectedRegistrationId}
         onOpenChange={(open) => !open && setSelectedRegistrationId(null)}
         userRole={userRole}

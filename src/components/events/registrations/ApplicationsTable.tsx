@@ -29,6 +29,7 @@ interface ApplicationsTableProps {
   registrations: Registration[];
   isLoading: boolean;
   error: Error | null;
+  eventTitle?: string;
   userRole?: UserRole;
   onViewDetails: (id: string) => void;
   onStatusUpdate: () => void;
@@ -38,6 +39,7 @@ export function ApplicationsTable({
   registrations,
   isLoading,
   error,
+  eventTitle,
   userRole,
   onViewDetails,
   onStatusUpdate,
@@ -146,6 +148,7 @@ export function ApplicationsTable({
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <ApplicationRowActions
                     registration={registration}
+                    eventTitle={eventTitle}
                     userRole={userRole}
                     onViewDetails={() => onViewDetails(registration.id)}
                     onStatusUpdate={onStatusUpdate}
