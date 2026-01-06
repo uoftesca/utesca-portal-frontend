@@ -30,16 +30,12 @@ import {
 } from '@/components/ui/select';
 import { useCreateEvent } from '@/hooks/use-events';
 import type { CreateEventRequest, EventStatus } from '@/types/event';
+import { convertTorontoTimeToUTC } from '@/lib/timezone';
 
 // Helper to convert datetime-local to ISO 8601 string
-// The datetime-local input gives us local time
-// Need to ensure it's properly formatted
+// The datetime-local input is interpreted as Toronto time
 const convertToISO = (localDateTime: string): string => {
-  if (!localDateTime) return '';
-  // datetime-local format: YYYY-MM-DDTHH:mm
-  // Append seconds if not present and convert to ISO
-  const date = new Date(localDateTime);
-  return date.toISOString();
+  return convertTorontoTimeToUTC(localDateTime);
 };
 
 export function CreateEventDialog() {

@@ -3,10 +3,10 @@
  */
 
 
-import type { UserRole, EmailNotificationPreference } from './user';
+import type { UserRole, NotificationPreferences } from './user';
 
 // Re-export user types for convenience so consumers can import from either file
-export { type UserRole, type EmailNotificationPreference } from './user';
+export { type UserRole, type EmailNotificationPreference, type NotificationPreferences } from './user';
 
 export interface Department {
   id: string;
@@ -37,7 +37,8 @@ export interface User {
   preferredName: string | null;
   photoUrl: string | null;
   invitedBy: string | null;
-  announcementEmailPreference: EmailNotificationPreference;
+  notificationPreferences: NotificationPreferences;
+  linkedinUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

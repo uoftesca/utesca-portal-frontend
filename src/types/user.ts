@@ -7,25 +7,22 @@ export type UserRole = 'co_president' | 'vp' | 'director';
 export type EmailNotificationPreference = 'all' | 'urgent_only' | 'none';
 
 /**
- * User profile type matching the backend /auth/me response
+ * Granular notification preferences stored as JSONB in database.
+ *
+ * Allows users to control which types of email notifications they receive.
+ * Role-agnostic: any user can opt-in to any notification type.
  */
-export interface UserProfile {
-  id: string;
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  preferredName: string | null;
-  role: UserRole;
-  displayRole: string;
-  departmentId: string | null;
-  photoUrl: string | null;
-  announcementEmailPreference: EmailNotificationPreference;
-  linkedinUrl: string | null;
-  invitedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
+export interface NotificationPreferences {
+  announcements: EmailNotificationPreference;
+  rsvpChanges: boolean;
+  newApplicationSubmitted: boolean;
 }
+
+/**
+ * Re-export User type from team.ts for convenience
+ * This represents user data from the backend (both /auth/me and team management endpoints)
+ */
+export type { User } from './team';
 
 /**
  * Query parameters for getting users

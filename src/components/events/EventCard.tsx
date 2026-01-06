@@ -13,8 +13,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { Event } from "@/types/event";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { EventStatusBadge } from "./EventStatusBadge";
 import { Calendar } from "lucide-react";
+import { formatInTorontoTime } from "@/lib/timezone";
 
 interface EventCardProps {
   event: Event;
@@ -24,20 +25,9 @@ interface EventCardProps {
 export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
   const [imageError, setImageError] = useState(false);
 
-  // Format date/time for display with timezone
+  // Format date/time for display in Toronto timezone
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      timeZone: userTimezone,
-      timeZoneName: "short",
-    });
+    return formatInTorontoTime(dateTime, "MMM d, yyyy h:mm a zzz");
   };
 
   // Truncate description to 2-3 lines (approximately 120 characters)
@@ -48,30 +38,18 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
     return text.substring(0, maxLength).trim() + "...";
   };
 
-  // Determine badge variant and label based on status
-  const getStatusBadge = () => {
-    switch (event.status) {
-      case "pending_approval":
-        return (
-          <Badge variant="outline" className="bg-yellow-700 text-yellow-50 border-yellow-200">
-            Pending Approval
-          </Badge>
-        );
-      case "sent_back":
-        return (
-          <Badge variant="outline" className="bg-red-700 text-red-50 border-red-200">
-            Sent Back
-          </Badge>
-        );
-      case "draft":
-        return (
-          <Badge variant="outline" className="bg-gray-700 text-gray-50 border-gray-200">
-            Draft
-          </Badge>
-        );
-      default:
-        return null;
+  // Get image positioning style
+  const getImageStyle = (position: string | null): React.CSSProperties => {
+    if (!position) return { objectPosition: 'center' };
+
+    // Check if position is a number (e.g., "-130")
+    const numericPosition = parseFloat(position);
+    if (!isNaN(numericPosition)) {
+      return { objectPosition: `center ${numericPosition}px` };
     }
+
+    // For named positions, use inline style to avoid dynamic class issues
+    return { objectPosition: position };
   };
 
   return (
@@ -87,12 +65,13 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
             alt={event.title}
             fill
             className="object-cover"
+            style={getImageStyle(event.imagePosition)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImageError(true)}
           />
         </div>
       ) : (
-        <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center rounded-t-xl">
+        <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-accent to-[#2A3441] flex items-center justify-center rounded-t-xl">
           <Calendar className="w-12 h-12 text-gray-500" />
         </div>
       )}
@@ -106,7 +85,11 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
           <Calendar className="w-3 h-3 mr-1" />
           {formatDateTime(event.dateTime)}
         </div>
-        <div>{getStatusBadge()}</div>
+        {event.status !== 'published' && (
+          <div>
+            <EventStatusBadge status={event.status} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

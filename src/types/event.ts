@@ -1,3 +1,5 @@
+import type { RegistrationFormSchema } from './registration';
+
 /**
  * Event status types matching backend EventStatus enum
  */
@@ -13,7 +15,7 @@ export interface BaseEventFields {
   location?: string;
   registrationDeadline?: string;
   status?: EventStatus;
-  registrationFormSchema?: Record<string, unknown>;
+  registrationFormSchema?: RegistrationFormSchema;
   maxCapacity?: number;
   imageUrl?: string;
   category?: string;
@@ -47,7 +49,7 @@ export interface Event {
   registrationDeadline: string | null;
   status: EventStatus;
   createdBy: string | null;
-  registrationFormSchema: Record<string, unknown> | null;
+  registrationFormSchema: RegistrationFormSchema | null;
   maxCapacity: number | null;
   imageUrl: string | null;
   createdAt: string;
