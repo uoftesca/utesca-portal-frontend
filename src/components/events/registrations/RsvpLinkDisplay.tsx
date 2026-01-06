@@ -7,11 +7,11 @@
  * with copy-to-clipboard functionality
  */
 
-import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 
 interface RsvpLinkDisplayProps {
   id: string;
@@ -20,19 +20,11 @@ interface RsvpLinkDisplayProps {
 export function RsvpLinkDisplay({
   id,
 }: Readonly<RsvpLinkDisplayProps>) {
-  const [copied, setCopied] = useState(false);
   const baseUrl = process.env.NEXT_PUBLIC_PUBLIC_URL || 'https://utesca.ca';
   const rsvpUrl = `${baseUrl}/rsvp/${id}`;
+  const { copied, copy } = useCopyToClipboard({ timeout: 2000 });
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(rsvpUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy:', error);
-    }
-  };
+  const handleCopy = () => copy(rsvpUrl);
 
   return (
     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">

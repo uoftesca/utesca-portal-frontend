@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUpdateRegistrationStatus } from '@/hooks/use-registrations';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import type { Registration } from '@/types/registration';
 import type { UserRole } from '@/types/user';
 
@@ -35,27 +36,27 @@ export function ApplicationRowActions({
   onStatusUpdate,
 }: Readonly<ApplicationRowActionsProps>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
   const updateStatus = useUpdateRegistrationStatus();
 
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showAcceptReject = canEdit && registration.status === 'submitted';
   const showCopyRsvp = registration.status === 'accepted';
 
-  const handleCopyRsvp = async () => {
-    const rsvpUrl = `https://utesca.ca/rsvp/${registration.id}`;
-    try {
-      await navigator.clipboard.writeText(rsvpUrl);
-      setCopySuccess(true);
-      setTimeout(() => {
-        setCopySuccess(false);
-        setIsOpen(false);
-      }, 1500);
-    } catch (error) {
-      console.error('Failed to copy RSVP link:', error);
+  const baseUrl = process.env.NEXT_PUBLIC_PUBLIC_URL || 'https://utesca.ca';
+  const rsvpUrl = `${baseUrl}/rsvp/${registration.id}`;
+
+  const { copied: copySuccess, copy } = useCopyToClipboard({
+    timeout: 1500,
+    onSuccess: () => {
+      // Close dropdown after successful copy
+      setTimeout(() => setIsOpen(false), 1500);
+    },
+    onError: () => {
       alert('Failed to copy RSVP link');
-    }
-  };
+    },
+  });
+
+  const handleCopyRsvp = () => copy(rsvpUrl);
 
   const handleAccept = async () => {
     try {
