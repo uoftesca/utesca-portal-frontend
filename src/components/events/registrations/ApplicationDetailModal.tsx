@@ -25,6 +25,7 @@ import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { RegistrationStatusBadge } from './RegistrationStatusBadge';
 import { formatInTorontoTime } from '@/lib/timezone';
 import { formatFieldValue, getFieldValueMetadata } from '@/lib/schema-utils';
+import { formatFileSize } from '@/lib/utils';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
 
@@ -53,13 +54,6 @@ export function ApplicationDetailModal({
   // Handle status update success
   const handleStatusUpdateSuccess = async () => {
     await refetch();
-  };
-
-  // Format file size
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
