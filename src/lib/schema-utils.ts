@@ -88,17 +88,68 @@ export function formatFieldName(key: string): string {
 }
 
 /**
- * Format field value for display
+ * Format field value for display with enhanced long text handling
  *
- * Handles arrays, booleans, null/undefined, objects, and primitive values
+ * Handles arrays, booleans, null/undefined, objects, and primitive values.
+ * Preserves formatting for long text (>100 chars) by returning them as-is
+ * rather than converting to string representation.
  *
  * @param value - The value to format
  * @returns The formatted value as a string
+ *
+ * @example
+ * formatFieldValue(['a', 'b']) // 'a, b'
+ * formatFieldValue(true) // 'Yes'
+ * formatFieldValue(null) // '—'
+ * formatFieldValue('very long text...') // returns original string
  */
 export function formatFieldValue(value: unknown): string {
   if (Array.isArray(value)) return value.join(', ');
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (value === null || value === undefined) return '—';
+  if (typeof value === 'string') {
+    // Preserve long text as-is for proper formatting in UI
+    return value;
+  }
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
+}
+
+/**
+ * Metadata about how a field value should be displayed
+ */
+export interface FieldValueMetadata {
+  /** Whether the value is long text (>100 chars) that should be displayed in a special container */
+  isLongText: boolean;
+  /** Whether the value is empty/null/undefined */
+  isEmpty: boolean;
+  /** Whether the value is a file object */
+  isFile: boolean;
+}
+
+/**
+ * Get metadata for a field value
+ *
+ * Returns metadata about how the value should be displayed,
+ * such as whether it's long text that needs special formatting.
+ *
+ * @param value - The value to analyze
+ * @returns Metadata object with display hints
+ *
+ * @example
+ * getFieldValueMetadata('short') // { isLongText: false, isEmpty: false, isFile: false }
+ * getFieldValueMetadata('long text over 100 chars...') // { isLongText: true, isEmpty: false, isFile: false }
+ * getFieldValueMetadata(null) // { isLongText: false, isEmpty: true, isFile: false }
+ */
+export function getFieldValueMetadata(value: unknown): FieldValueMetadata {
+  const isEmpty = value === null || value === undefined || value === '';
+  const isFile =
+    typeof value === 'object' &&
+    value !== null &&
+    'fileUrl' in value &&
+    'fileName' in value;
+  const isLongText =
+    typeof value === 'string' && value.length > 100 && !isFile;
+
+  return { isLongText, isEmpty, isFile };
 }

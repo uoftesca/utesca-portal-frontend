@@ -24,6 +24,7 @@ import { AcceptRejectActions } from './AcceptRejectActions';
 import { RsvpLinkDisplay } from './RsvpLinkDisplay';
 import { RegistrationStatusBadge } from './RegistrationStatusBadge';
 import { formatInTorontoTime } from '@/lib/timezone';
+import { formatFieldValue, getFieldValueMetadata } from '@/lib/schema-utils';
 import type { UserRole } from '@/types/user';
 import type { RegistrationFormSchema } from '@/types/registration';
 
@@ -48,37 +49,6 @@ export function ApplicationDetailModal({
   const canEdit = userRole === 'vp' || userRole === 'co_president';
   const showActions = canEdit && registration?.status === 'submitted';
   const showRsvpLink = registration?.status === 'accepted';
-
-  // Check if value is a file object (has fileUrl and fileName)
-  const isFileObject = (value: unknown): boolean => {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      'fileUrl' in value &&
-      'fileName' in value
-    );
-  };
-
-  // Format field value for display
-  const formatFieldValue = (value: unknown): string => {
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-    if (value === null || value === undefined) {
-      return '—';
-    }
-    if (typeof value === 'string' && value.length > 100) {
-      // Long text field - preserve line breaks
-      return value;
-    }
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-    return String(value);
-  };
 
   // Handle status update success
   const handleStatusUpdateSuccess = async () => {
@@ -155,25 +125,23 @@ export function ApplicationDetailModal({
                 schema.fields
                   .map((field) => {
                     const value = registration.formData[field.id];
+                    const metadata = getFieldValueMetadata(value);
 
                     // Skip empty optional fields
-                    if (value === undefined || value === null || value === '') {
+                    if (metadata.isEmpty) {
                       return null;
                     }
 
-                    const isFile = isFileObject(value);
-                    const displayValue = isFile
+                    const displayValue = metadata.isFile
                       ? (value as { fileName: string }).fileName
                       : formatFieldValue(value);
-                    const isLongText =
-                      !isFile && typeof value === 'string' && value.length > 100;
 
                     return (
                       <div key={field.id} className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">
                           {field.label}
                         </p>
-                        {isLongText ? (
+                        {metadata.isLongText ? (
                           <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap">
                             {displayValue}
                           </div>
