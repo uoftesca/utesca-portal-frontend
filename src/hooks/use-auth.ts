@@ -29,16 +29,21 @@ export function useAuth() {
   const query = useQuery<User | null, Error>({
     queryKey: authKeys.user,
     queryFn: async () => {
-      try {
-        const response = await apiClient.getCurrentUser();
-        return response as User;
-      } catch {
-        // If user is not authenticated, return null instead of throwing
-        return null;
-      }
+      // Let errors throw - React Query won't cache failed responses
+      // This prevents caching null when token expires
+      const response = await apiClient.getCurrentUser();
+      return response as User;
     },
     staleTime: 60 * 1000, // 1 minute (auth changes less frequently than other data)
-    retry: 1, // Only retry once for auth failures
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors (401) - let them fail fast
+      // so middleware can redirect to sign-in
+      if (error?.message?.includes('401')) {
+        return false;
+      }
+      // Retry other errors once (network issues, etc.)
+      return failureCount < 1;
+    },
   });
 
   return {

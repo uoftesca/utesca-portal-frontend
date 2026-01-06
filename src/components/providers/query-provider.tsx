@@ -4,10 +4,12 @@
  * React Query Provider Component
  *
  * Wraps the app with QueryClientProvider for React Query functionality
+ * and sets up auth state synchronization
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useAuthSync } from '@/hooks/use-auth-sync';
 
 export function QueryProvider({
   children,
@@ -27,7 +29,21 @@ export function QueryProvider({
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthSyncWrapper>{children}</AuthSyncWrapper>
+    </QueryClientProvider>
   );
+}
+
+/**
+ * Wrapper component to use auth sync hook
+ * (hooks can't be called directly in QueryProvider since it's not a child of QueryClientProvider)
+ */
+function AuthSyncWrapper({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  // Set up auth state synchronization
+  useAuthSync();
+  return <>{children}</>;
 }
 
