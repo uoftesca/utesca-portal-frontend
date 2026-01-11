@@ -17,9 +17,11 @@ import { authKeys } from './use-auth';
  * Should be called once in the QueryProvider to set up the global auth listener.
  *
  * Handles the following events:
- * - SIGNED_OUT: Clears all cached data
- * - TOKEN_REFRESHED: Invalidates user query to refetch with new token
- * - SIGNED_IN: Invalidates user query to fetch user data
+ * - INITIAL_SESSION: Session recovered from cookies on page load
+ * - SIGNED_IN: User signed in (invalidates user query to fetch user data)
+ * - SIGNED_OUT: User signed out (clears all cached data)
+ * - TOKEN_REFRESHED: Token refreshed (invalidates user query to refetch with new token)
+ * - USER_UPDATED: User metadata updated (invalidates user query)
  */
 export function useAuthSync() {
   const queryClient = useQueryClient();
@@ -34,6 +36,19 @@ export function useAuthSync() {
       console.log('[Auth Sync] Auth state changed:', event);
 
       switch (event) {
+        case 'INITIAL_SESSION':
+          // Session was recovered from cookies (e.g., page refresh or returning to tab)
+          // Invalidate user query to sync React Query with the recovered session
+          console.log('[Auth Sync] Initial session recovered, invalidating user query');
+          queryClient.invalidateQueries({ queryKey: authKeys.user });
+          break;
+
+        case 'SIGNED_IN':
+          // Invalidate user query when user signs in
+          console.log('[Auth Sync] User signed in, invalidating user query');
+          queryClient.invalidateQueries({ queryKey: authKeys.user });
+          break;
+
         case 'SIGNED_OUT':
           // Clear all cached data when user signs out
           console.log('[Auth Sync] Clearing all cached data');
@@ -44,12 +59,6 @@ export function useAuthSync() {
           // Invalidate user query when token is refreshed
           // This ensures we fetch fresh user data with the new token
           console.log('[Auth Sync] Token refreshed, invalidating user query');
-          queryClient.invalidateQueries({ queryKey: authKeys.user });
-          break;
-
-        case 'SIGNED_IN':
-          // Invalidate user query when user signs in
-          console.log('[Auth Sync] User signed in, invalidating user query');
           queryClient.invalidateQueries({ queryKey: authKeys.user });
           break;
 
