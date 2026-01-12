@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,7 +37,7 @@ interface RawUserMetadata {
 
 export default function AcceptInviteForm() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

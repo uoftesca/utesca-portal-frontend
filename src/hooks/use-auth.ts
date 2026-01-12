@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
-import { createClient } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import type { User } from '@/types/team';
 
 /**
@@ -66,7 +66,7 @@ export function useAuth() {
 export function useSignOut() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
 
   return useMutation<void, Error>({
     mutationFn: async () => {
