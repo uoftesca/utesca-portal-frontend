@@ -6,6 +6,14 @@ import type { RegistrationFormSchema } from './registration';
 export type EventStatus = 'draft' | 'pending_approval' | 'sent_back' | 'published';
 
 /**
+ * Email template for acceptance/rejection notifications
+ */
+export interface EmailTemplate {
+  subject: string;
+  body: string;
+}
+
+/**
  * Base event fields shared between create and update
  */
 export interface BaseEventFields {
@@ -22,6 +30,8 @@ export interface BaseEventFields {
   imagePosition?: string;
   albumLink?: string;
   registrationLink?: string;
+  acceptanceEmailTemplate?: EmailTemplate;
+  rejectionEmailTemplate?: EmailTemplate;
 }
 
 /**
@@ -60,6 +70,8 @@ export interface Event {
   imagePosition: string | null;
   albumLink: string | null;
   registrationLink: string | null;
+  acceptanceEmailTemplate: EmailTemplate | null;
+  rejectionEmailTemplate: EmailTemplate | null;
 }
 
 /**
