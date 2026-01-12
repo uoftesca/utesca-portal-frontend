@@ -44,8 +44,8 @@ export function ConfirmActionDialog({
   const title = isAccept ? 'Accept Application?' : 'Reject Application?';
 
   const description = isAccept
-    ? `You are about to accept ${applicantName}'s application for ${eventTitle}. An RSVP link will be generated. You will need to manually email it to ${applicantName}.`
-    : `You are about to reject ${applicantName}'s application for ${eventTitle}. This action cannot be undone.`;
+    ? `You are about to accept ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} with an RSVP link to confirm their attendance.`
+    : `You are about to reject ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail}. This action cannot be undone.`;
 
   const confirmButtonText = isAccept ? 'Accept Application' : 'Reject Application';
   const loadingText = isAccept ? 'Accepting...' : 'Rejecting...';
