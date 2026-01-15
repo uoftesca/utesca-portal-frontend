@@ -43,6 +43,7 @@ export interface Registration {
   checkedInBy: string | null;
   createdAt: string;
   updatedAt: string;
+  rsvpLink?: string; // Only present when status is 'accepted'
 }
 
 /**
