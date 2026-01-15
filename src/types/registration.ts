@@ -91,7 +91,6 @@ export interface RegistrationStatusUpdate {
 export interface RegistrationStatusUpdateResponse {
   success: boolean;
   registration: Registration;
-  rsvpLink?: string; // Only present when status is 'accepted'
 }
 
 /**
