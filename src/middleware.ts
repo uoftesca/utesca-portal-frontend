@@ -32,7 +32,9 @@ export async function middleware(request: NextRequest) {
 
   const isSignInPage = request.nextUrl.pathname.startsWith('/sign-in')
   const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/accept-invite')
-  const isAuthPage = isSignInPage || isAcceptInvitePage
+  const isForgotPasswordPage = request.nextUrl.pathname.startsWith('/forgot-password')
+  const isResetPasswordPage = request.nextUrl.pathname.startsWith('/reset-password')
+  const isAuthPage = isSignInPage || isAcceptInvitePage || isForgotPasswordPage || isResetPasswordPage
 
   // Redirect to home if authenticated and on sign-in page
   // (but allow access to accept-invite page even if authenticated)

@@ -75,6 +75,11 @@ export function SignInForm() {
     }
   };
 
+const handleForgotPassword = () => {
+  // No need for async, loading, or try/catch for a simple redirect
+  router.push('/forgot-password');
+};
+
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="space-y-1 text-center">
@@ -124,8 +129,7 @@ export function SignInForm() {
               <span
                 className="text-sm text-primary cursor-pointer hover:underline"
                 onClick={() => {
-                  // TODO: Implement forgot password flow
-                  // Call backend endpoint: POST /auth/forgot-password with email
+                  handleForgotPassword()
                   console.log('Forgot password clicked');
                 }}
               >
