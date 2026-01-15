@@ -43,6 +43,7 @@ export interface Registration {
   checkedInBy: string | null;
   createdAt: string;
   updatedAt: string;
+  rsvpLink?: string; // Only present when status is 'accepted'
 }
 
 /**
@@ -90,7 +91,6 @@ export interface RegistrationStatusUpdate {
 export interface RegistrationStatusUpdateResponse {
   success: boolean;
   registration: Registration;
-  rsvpLink?: string; // Only present when status is 'accepted'
 }
 
 /**

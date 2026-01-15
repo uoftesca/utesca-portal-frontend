@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Application Detail Modal Component
@@ -6,7 +6,7 @@
  * Full-screen detail view of a registration with all form responses and files
  */
 
-import { Download } from 'lucide-react';
+import { Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,20 +14,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useRegistration } from '@/hooks/use-registrations';
-import { AcceptRejectActions } from './AcceptRejectActions';
-import { RsvpLinkDisplay } from './RsvpLinkDisplay';
-import { RegistrationStatusBadge } from './RegistrationStatusBadge';
-import { formatInTorontoTime } from '@/lib/timezone';
-import { formatFieldValue, getFieldValueMetadata, extractName, extractEmail } from '@/lib/schema-utils';
-import { formatFileSize } from '@/lib/utils';
-import type { UserRole } from '@/types/user';
-import type { RegistrationFormSchema } from '@/types/registration';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRegistration } from "@/hooks/use-registrations";
+import { AcceptRejectActions } from "./AcceptRejectActions";
+import { RsvpLinkDisplay } from "./RsvpLinkDisplay";
+import { RegistrationStatusBadge } from "./RegistrationStatusBadge";
+import { formatInTorontoTime } from "@/lib/timezone";
+import {
+  formatFieldValue,
+  getFieldValueMetadata,
+  extractName,
+  extractEmail,
+} from "@/lib/schema-utils";
+import { formatFileSize } from "@/lib/utils";
+import type { UserRole } from "@/types/user";
+import type { RegistrationFormSchema } from "@/types/registration";
 
 interface ApplicationDetailModalProps {
   registrationId: string | null;
@@ -49,13 +54,15 @@ export function ApplicationDetailModal({
   const { data, isLoading, error, refetch } = useRegistration(registrationId);
 
   const registration = data?.registration;
-  const canEdit = userRole === 'vp' || userRole === 'co_president';
-  const showActions = canEdit && registration?.status === 'submitted';
-  const showRsvpLink = registration?.status === 'accepted';
+  const canEdit = userRole === "vp" || userRole === "co_president";
+  const showActions = canEdit && registration?.status === "submitted";
+  const showRsvpLink = registration?.status === "accepted";
 
   // Extract applicant data for confirmation dialogs
-  const applicantName = registration ? extractName(registration.formData) : '';
-  const applicantEmail = registration ? extractEmail(registration.formData) : '';
+  const applicantName = registration ? extractName(registration.formData) : "";
+  const applicantEmail = registration
+    ? extractEmail(registration.formData)
+    : "";
 
   // Handle status update success
   const handleStatusUpdateSuccess = async () => {
@@ -83,7 +90,7 @@ export function ApplicationDetailModal({
         {error && (
           <Alert variant="destructive">
             <AlertDescription>
-              {error.message || 'Failed to load registration details'}
+              {error.message || "Failed to load registration details"}
             </AlertDescription>
           </Alert>
         )}
@@ -93,17 +100,29 @@ export function ApplicationDetailModal({
             {/* Status and Metadata */}
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                Submitted @ {formatInTorontoTime(registration.submittedAt, 'MMM d, yyyy h:mm a zzz')}
+                Submitted @{" "}
+                {formatInTorontoTime(
+                  registration.submittedAt,
+                  "MMM d, yyyy h:mm a zzz"
+                )}
               </p>
               {registration.reviewedAt && registration.reviewedBy && (
                 <p className="text-sm text-muted-foreground">
-                  Reviewed @ {formatInTorontoTime(registration.reviewedAt, 'MMM d, yyyy h:mm a zzz')}
+                  Reviewed @{" "}
+                  {formatInTorontoTime(
+                    registration.reviewedAt,
+                    "MMM d, yyyy h:mm a zzz"
+                  )}
                 </p>
               )}
               <div className="flex w-full items-start justify-between">
                 {registration.confirmedAt && (
                   <p className="text-sm text-muted-foreground">
-                    Confirmed @ {formatInTorontoTime(registration.confirmedAt, 'MMM d, yyyy h:mm a zzz')}
+                    Confirmed @{" "}
+                    {formatInTorontoTime(
+                      registration.confirmedAt,
+                      "MMM d, yyyy h:mm a zzz"
+                    )}
                   </p>
                 )}
                 <RegistrationStatusBadge status={registration.status} />
@@ -131,11 +150,12 @@ export function ApplicationDetailModal({
                     displayValue = (value as { fileName: string }).fileName;
                   } else if (
                     // For optional checkboxes, treat empty arrays or false as empty (show "—")
-                    field.type === 'checkbox' &&
+                    field.type === "checkbox" &&
                     !field.required &&
-                    (value === false || (Array.isArray(value) && value.length === 0))
+                    (value === false ||
+                      (Array.isArray(value) && value.length === 0))
                   ) {
-                    displayValue = '—';
+                    displayValue = "—";
                   } else {
                     displayValue = formatFieldValue(value); // Returns "—" for null/undefined
                   }
@@ -180,11 +200,7 @@ export function ApplicationDetailModal({
                           {formatFileSize(file.fileSize)} • {file.mimeType}
                         </p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        asChild
-                      >
+                      <Button size="sm" variant="outline" asChild>
                         <a
                           href={file.fileUrl}
                           target="_blank"
@@ -204,7 +220,7 @@ export function ApplicationDetailModal({
             {showRsvpLink && (
               <>
                 <Separator />
-                <RsvpLinkDisplay id={registration.id} />
+                <RsvpLinkDisplay rsvpLink={registration.rsvpLink} />
               </>
             )}
           </div>
@@ -216,7 +232,7 @@ export function ApplicationDetailModal({
               registrationId={registration.id}
               applicantName={applicantName}
               applicantEmail={applicantEmail}
-              eventTitle={eventTitle || 'this event'}
+              eventTitle={eventTitle || "this event"}
               onSuccess={handleStatusUpdateSuccess}
             />
           )}
