@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * RSVP Link Display Component
@@ -7,24 +7,25 @@
  * with copy-to-clipboard functionality
  */
 
-import { Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 interface RsvpLinkDisplayProps {
-  id: string;
+  rsvpLink?: string;
 }
 
-export function RsvpLinkDisplay({
-  id,
-}: Readonly<RsvpLinkDisplayProps>) {
-  const baseUrl = process.env.NEXT_PUBLIC_PUBLIC_URL || 'https://utesca.ca';
-  const rsvpUrl = `${baseUrl}/rsvp/${id}`;
+export function RsvpLinkDisplay({ rsvpLink }: Readonly<RsvpLinkDisplayProps>) {
   const { copied, copy } = useCopyToClipboard({ timeout: 2000 });
 
-  const handleCopy = () => copy(rsvpUrl);
+  // Early return if no link provided by backend
+  if (!rsvpLink) {
+    return null;
+  }
+
+  const handleCopy = () => copy(rsvpLink);
 
   return (
     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
@@ -34,7 +35,7 @@ export function RsvpLinkDisplay({
       <div className="flex items-center gap-2 mt-1">
         <Input
           readOnly
-          value={rsvpUrl}
+          value={rsvpLink}
           className="flex-1 text-sm bg-white"
           onClick={(e) => e.currentTarget.select()}
         />
@@ -42,7 +43,7 @@ export function RsvpLinkDisplay({
           size="sm"
           variant="outline"
           onClick={handleCopy}
-          className={copied ? 'bg-green-100' : ''}
+          className={copied ? "bg-green-100" : ""}
         >
           {copied ? (
             <>

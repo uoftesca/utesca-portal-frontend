@@ -4,7 +4,7 @@
  * Handles all HTTP requests to the FastAPI backend with authentication.
  */
 
-import { createClient } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import {
   CreateEventRequest,
   UpdateEventRequest,
@@ -25,10 +25,13 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
 
 /**
- * Make an authenticated fetch request with automatic token refresh on 401
+ * Make an authenticated fetch request
  *
- * This is the core auth + retry logic used by all API calls.
+ * This is the core auth logic used by all API calls.
  * Returns the Response object for further processing.
+ *
+ * Token refresh is handled automatically by Supabase's singleton client.
+ * getSession() reads from memory/storage and does NOT trigger refreshes.
  *
  * @param endpoint - API endpoint (e.g., '/auth/me')
  * @param options - Fetch options
@@ -38,17 +41,17 @@ async function authenticatedFetch(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
 
-  // Get current session
+  // Get current session (reads from memory, does not trigger refresh)
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
     throw new Error('No access token available. Please sign in.');
   }
 
-  // Make initial request
-  let response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  // Make request with access token
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
@@ -56,28 +59,12 @@ async function authenticatedFetch(
     },
   });
 
-  // Handle 401 (Unauthorized) - token may have expired
+  // If we get 401, the token is expired or invalid
+  // Supabase will auto-refresh in the background
+  // React Query will retry with the refreshed token
   if (response.status === 401) {
-    console.warn('[API Client] Received 401, attempting to refresh token and retry');
-
-    // Attempt to refresh the session
-    const { data, error } = await supabase.auth.refreshSession();
-
-    if (error || !data.session) {
-      console.error('[API Client] Token refresh failed:', error);
-      throw new Error('Token refresh failed. Please sign in again.');
-    }
-
-    console.log('[API Client] Token refreshed successfully, retrying request');
-
-    // Retry request with new token
-    response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${data.session.access_token}`,
-        ...options.headers,
-      },
-    });
+    console.warn('[API Client] Received 401 - token expired, React Query will retry with refreshed token');
+    throw new Error('Authentication failed. Token may have expired.');
   }
 
   return response;
