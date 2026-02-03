@@ -142,17 +142,15 @@ export function useUpdateRegistrationStatus() {
  * Hook to export registrations to CSV
  */
 export function useExportRegistrations() {
-  return useMutation<Blob, Error, { eventId: string; status?: RegistrationStatus }>({
-    mutationFn: async ({ eventId, status }) => {
-      const blob = await apiClient.exportRegistrations(eventId, status);
-      return blob;
+  return useMutation<{ blob: Blob; filename: string }, Error, { eventId: string; status?: RegistrationStatus }>({
+    mutationFn: ({ eventId, status }) => {
+      return apiClient.exportRegistrations(eventId, status);
     },
-    onSuccess: (blob, { eventId, status }) => {
-      // Trigger download
+    onSuccess: ({ blob, filename }) => {
       const url = globalThis.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `registrations-${eventId}${status ? `-${status}` : ''}.csv`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       globalThis.URL.revokeObjectURL(url);

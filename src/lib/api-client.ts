@@ -220,12 +220,11 @@ export const apiClient = {
     });
   },
 
-  exportRegistrations: async (eventId: string, status?: RegistrationStatus) => {
+  exportRegistrations: async (eventId: string, status?: RegistrationStatus): Promise<{ blob: Blob; filename: string }> => {
     const query = new URLSearchParams();
     if (status) query.append('status', status);
     const queryString = query.toString() ? `?${query.toString()}` : '';
 
-    // Use authenticatedFetch for consistent auth + retry logic
     const response = await authenticatedFetch(
       `/portal/events/${eventId}/registrations/export${queryString}`
     );
@@ -234,6 +233,11 @@ export const apiClient = {
       throw new Error(`Failed to export registrations: ${response.status}`);
     }
 
-    return response.blob();
+    // Extract filename from Content-Disposition header; fall back to eventId
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    const filename = match?.[1] || `event-registrations-${eventId}.csv`;
+
+    return { blob: await response.blob(), filename };
   },
 };
