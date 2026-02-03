@@ -149,15 +149,14 @@ export function ApplicationDetailModal({
                   if (metadata.isFile) {
                     displayValue = (value as { fileName: string }).fileName;
                   } else if (
-                    // For optional checkboxes, treat empty arrays or false as empty (show "—")
-                    field.type === "checkbox" &&
                     !field.required &&
-                    (value === false ||
+                    (metadata.isEmpty ||
+                      value === false ||
                       (Array.isArray(value) && value.length === 0))
                   ) {
                     displayValue = "—";
                   } else {
-                    displayValue = formatFieldValue(value); // Returns "—" for null/undefined
+                    displayValue = formatFieldValue(value);
                   }
 
                   return (
