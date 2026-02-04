@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Download, Archive } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -16,6 +16,7 @@ import {
   useRegistrations,
   useRegistrationCounts,
   useExportRegistrations,
+  useDownloadRegistrationFiles,
 } from '@/hooks/use-registrations';
 import { useEvent } from '@/hooks/use-events';
 import { StatusFilterCards } from './StatusFilterCards';
@@ -60,8 +61,9 @@ export function ApplicationsDashboard({
   // Fetch counts for tabs
   const { data: counts } = useRegistrationCounts(eventId);
 
-  // Export mutation
+  // Export / download mutations
   const exportMutation = useExportRegistrations();
+  const downloadFilesMutation = useDownloadRegistrationFiles();
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -91,6 +93,10 @@ export function ApplicationsDashboard({
     });
   };
 
+  const handleDownloadFiles = () => {
+    downloadFilesMutation.mutate({ eventId });
+  };
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -113,14 +119,24 @@ export function ApplicationsDashboard({
             {event?.title || 'Loading...'}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          disabled={exportMutation.isPending}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          {exportMutation.isPending ? 'Exporting...' : 'Export CSV'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={exportMutation.isPending}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {exportMutation.isPending ? 'Exporting...' : 'Export CSV'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleDownloadFiles}
+            disabled={downloadFilesMutation.isPending}
+          >
+            <Archive className="h-4 w-4 mr-2" />
+            {downloadFilesMutation.isPending ? 'Downloading...' : 'Download Files'}
+          </Button>
+        </div>
       </div>
 
       {/* Status Filter Cards */}
