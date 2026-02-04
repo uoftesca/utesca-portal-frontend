@@ -158,3 +158,28 @@ export function useExportRegistrations() {
     },
   });
 }
+
+/**
+ * Hook to download all registration files as a ZIP archive
+ */
+export function useDownloadRegistrationFiles() {
+  return useMutation<{ blob: Blob; filename: string; errorCount: number }, Error, { eventId: string }>({
+    mutationFn: ({ eventId }) => {
+      return apiClient.downloadRegistrationFiles(eventId);
+    },
+    onSuccess: ({ blob, filename, errorCount }) => {
+      const url = globalThis.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      globalThis.URL.revokeObjectURL(url);
+      a.remove();
+
+      if (errorCount > 0) {
+        console.warn(`[Download Files] ZIP created with ${errorCount} file(s) missing due to download errors.`);
+      }
+    },
+  });
+}
