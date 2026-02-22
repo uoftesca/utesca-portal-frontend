@@ -5,7 +5,7 @@
  * from domains/events/registrations/models.py
  */
 
-export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending';
+export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending' | 'waitlist';
 
 /**
  * File metadata for uploaded files (resumes, etc.)
