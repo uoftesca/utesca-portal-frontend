@@ -82,7 +82,7 @@ export interface RegistrationDetailResponse {
  * Status update request payload
  */
 export interface RegistrationStatusUpdate {
-  status: 'accepted' | 'rejected';
+  status: 'accepted' | 'rejected' | 'waitlist';
 }
 
 /**
