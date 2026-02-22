@@ -36,7 +36,7 @@ export function StatusFilterCards({
     { value: 'all', label: 'All', count: totalCount },
     { value: 'submitted', label: 'Submitted', count: counts.submitted },
     { value: 'accepted', label: 'Accepted', count: counts.accepted },
-    { value: 'waitlist', label: 'Waitlisted', count: counts.accepted },
+    { value: 'waitlist', label: 'Waitlisted', count: counts.waitlist },
     { value: 'rejected', label: 'Rejected', count: counts.rejected },
     { value: 'confirmed', label: 'Confirmed', count: counts.confirmed },
     { value: 'not_attending', label: 'Not Attending', count: counts.notAttending },

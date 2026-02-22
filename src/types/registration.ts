@@ -112,6 +112,7 @@ export interface StatusCounts {
   accepted: number;
   rejected: number;
   confirmed: number;
+  waitlist: number;
   notAttending: number;
 }
 
