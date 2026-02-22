@@ -11,7 +11,7 @@ import type { RegistrationStatus } from '@/types/registration';
  */
 export function getRegistrationStatusVariant(
   status: RegistrationStatus
-): 'default' | 'outline' | 'destructive' | 'warning' | 'success' {
+): 'default' | 'outline' | 'destructive' | 'warning' | 'success' | 'orange' {
   switch (status) {
     case 'submitted':
       return 'default';
@@ -23,6 +23,8 @@ export function getRegistrationStatusVariant(
       return 'success';
     case 'not_attending':
       return 'warning';
+    case 'waitlist':
+      return 'orange';
     default:
       return 'default';
   }
