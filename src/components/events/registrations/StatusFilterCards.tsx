@@ -30,7 +30,7 @@ export function StatusFilterCards({
   counts,
 }: Readonly<StatusFilterCardsProps>) {
   const totalCount =
-    counts.submitted + counts.accepted + counts.rejected + counts.confirmed + counts.notAttending;
+    counts.submitted + counts.accepted + counts.rejected + counts.confirmed + counts.waitlist + counts.notAttending;
 
   const statusCards: StatusCard[] = [
     { value: 'all', label: 'All', count: totalCount },
