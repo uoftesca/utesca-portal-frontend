@@ -180,7 +180,7 @@ export function ApplicationsDashboard({
 
       {activeStatus === 'waitlist' && 
         <p className="text-sm text-muted-foreground">
-          {counts.waitlist} people on waitlist | {event?.maxCapacity - (counts.confirmed + counts.accepted)} spots available 
+          {counts.waitlist} people on waitlist | {event?.maxCapacity && event?.maxCapacity - (counts.confirmed + counts.accepted)} spots available 
         </p>
       }
 
