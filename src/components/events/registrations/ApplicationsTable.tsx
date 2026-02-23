@@ -35,6 +35,7 @@ interface ApplicationsTableProps {
   error: Error | null;
   eventTitle?: string;
   userRole?: UserRole;
+  activeStatus?: string;
   onViewDetails: (id: string) => void;
   onStatusUpdate: () => void;
 }
@@ -45,6 +46,7 @@ export function ApplicationsTable({
   error,
   eventTitle,
   userRole,
+  activeStatus,
   onViewDetails,
   onStatusUpdate,
 }: Readonly<ApplicationsTableProps>) {
@@ -132,18 +134,22 @@ export function ApplicationsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {registrations.map((registration) => {
+          {registrations.map((registration, index) => {
             const name = extractName(registration.formData);
             const email = extractEmail(registration.formData);
             const appliedAt = formatInTorontoTime(
               registration.submittedAt,
               "MMM d, yyyy h:mm a zzz"
             );
+            const isFirstWaitlist =
+              index === registrations.length - 1 && activeStatus === "waitlist";
 
             return (
               <TableRow
                 key={registration.id}
-                className="hover:bg-muted/50 cursor-pointer"
+                className={`hover:bg-muted/50 cursor-pointer ${
+                  isFirstWaitlist ? "bg-yellow-50 dark:bg-yellow-950/20" : ""
+                }`}
                 onClick={() => onViewDetails(registration.id)}
               >
                 <TableCell className="font-medium">{name}</TableCell>
