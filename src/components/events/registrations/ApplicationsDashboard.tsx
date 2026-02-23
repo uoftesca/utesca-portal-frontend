@@ -172,6 +172,12 @@ export function ApplicationsDashboard({
         onStatusUpdate={handleStatusUpdate}
       />
 
+      {activeStatus === 'waitlist' && 
+        <p className="text-sm text-muted-foreground">
+          {counts.waitlist} people on waitlist | {event?.maxCapacity - (counts.confirmed + counts.accepted)} spots available 
+        </p>
+      }
+
       {/* Pagination */}
       {pagination && pagination.total > 0 && (
         <>
