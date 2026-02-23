@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Accept/Reject Actions Component
@@ -6,11 +6,11 @@
  * Action buttons for VPs and Co-Presidents to accept or reject applications
  */
 
-import { useState } from 'react';
-import { Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useUpdateRegistrationStatus } from '@/hooks/use-registrations';
-import { ConfirmActionDialog } from './ConfirmActionDialog';
+import { useState } from "react";
+import { Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useUpdateRegistrationStatus } from "@/hooks/use-registrations";
+import { ConfirmActionDialog } from "./ConfirmActionDialog";
 
 interface AcceptRejectActionsProps {
   registrationId: string;
@@ -18,7 +18,7 @@ interface AcceptRejectActionsProps {
   applicantEmail: string;
   eventTitle: string;
   onSuccess?: (rsvpLink?: string) => void;
-  variant?: 'default' | 'compact';
+  variant?: "default" | "compact";
 }
 
 export function AcceptRejectActions({
@@ -27,7 +27,7 @@ export function AcceptRejectActions({
   applicantEmail,
   eventTitle,
   onSuccess,
-  variant = 'default',
+  variant = "default",
 }: Readonly<AcceptRejectActionsProps>) {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -37,13 +37,13 @@ export function AcceptRejectActions({
     try {
       const result = await updateStatus.mutateAsync({
         registrationId,
-        data: { status: 'accepted' },
+        data: { status: "accepted" },
       });
       setShowAcceptDialog(false);
-      onSuccess?.(result.rsvpLink);
+      onSuccess?.(result.registration.rsvpLink);
     } catch (error) {
       // Error will be handled by React Query
-      console.error('Failed to accept registration:', error);
+      console.error("Failed to accept registration:", error);
     }
   };
 
@@ -51,16 +51,16 @@ export function AcceptRejectActions({
     try {
       await updateStatus.mutateAsync({
         registrationId,
-        data: { status: 'rejected' },
+        data: { status: "rejected" },
       });
       setShowRejectDialog(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Failed to reject registration:', error);
+      console.error("Failed to reject registration:", error);
     }
   };
 
-  const buttonSize = variant === 'compact' ? 'sm' : 'default';
+  const buttonSize = variant === "compact" ? "sm" : "default";
 
   return (
     <>
@@ -112,7 +112,7 @@ export function AcceptRejectActions({
       {/* Error Display */}
       {updateStatus.isError && (
         <p className="text-sm text-red-600 mt-2">
-          {updateStatus.error?.message || 'Failed to update status'}
+          {updateStatus.error?.message || "Failed to update status"}
         </p>
       )}
     </>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Applications Table Component
@@ -7,7 +7,8 @@
  * Uses schema-aware utility functions for proper field label extraction
  */
 
-import { FileX } from 'lucide-react';
+import { useState } from "react";
+import { FileX, Copy, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,15 +16,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ApplicationRowActions } from './ApplicationRowActions';
-import { RegistrationStatusBadge } from './RegistrationStatusBadge';
-import { extractName, extractEmail } from '@/lib/schema-utils';
-import { formatInTorontoTime } from '@/lib/timezone';
-import type { Registration } from '@/types/registration';
-import type { UserRole } from '@/types/user';
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { ApplicationRowActions } from "./ApplicationRowActions";
+import { RegistrationStatusBadge } from "./RegistrationStatusBadge";
+import { extractName, extractEmail } from "@/lib/schema-utils";
+import { formatInTorontoTime } from "@/lib/timezone";
+import type { Registration } from "@/types/registration";
+import type { UserRole } from "@/types/user";
 
 interface ApplicationsTableProps {
   registrations: Registration[];
@@ -44,6 +48,9 @@ export function ApplicationsTable({
   onViewDetails,
   onStatusUpdate,
 }: Readonly<ApplicationsTableProps>) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copy } = useCopyToClipboard({ timeout: 2000 });
+
   // Loading state
   if (isLoading) {
     return (
@@ -89,7 +96,7 @@ export function ApplicationsTable({
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          {error.message || 'Failed to load registrations'}
+          {error.message || "Failed to load registrations"}
         </AlertDescription>
       </Alert>
     );
@@ -130,7 +137,7 @@ export function ApplicationsTable({
             const email = extractEmail(registration.formData);
             const appliedAt = formatInTorontoTime(
               registration.submittedAt,
-              'MMM d, yyyy h:mm a zzz'
+              "MMM d, yyyy h:mm a zzz"
             );
 
             return (
@@ -140,7 +147,34 @@ export function ApplicationsTable({
                 onClick={() => onViewDetails(registration.id)}
               >
                 <TableCell className="font-medium">{name}</TableCell>
-                <TableCell className="text-muted-foreground">{email}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <span>{email?.toLowerCase()}</span>
+                    {email && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copy(email.toLowerCase());
+                              setCopiedId(registration.id);
+                              setTimeout(() => setCopiedId(null), 2000);
+                            }}
+                          >
+                            {copiedId === registration.id ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                      </Tooltip>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-sm">{appliedAt}</TableCell>
                 <TableCell>
                   <RegistrationStatusBadge status={registration.status} />

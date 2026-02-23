@@ -220,12 +220,11 @@ export const apiClient = {
     });
   },
 
-  exportRegistrations: async (eventId: string, status?: RegistrationStatus) => {
+  exportRegistrations: async (eventId: string, status?: RegistrationStatus): Promise<{ blob: Blob; filename: string }> => {
     const query = new URLSearchParams();
     if (status) query.append('status', status);
     const queryString = query.toString() ? `?${query.toString()}` : '';
 
-    // Use authenticatedFetch for consistent auth + retry logic
     const response = await authenticatedFetch(
       `/portal/events/${eventId}/registrations/export${queryString}`
     );
@@ -234,6 +233,30 @@ export const apiClient = {
       throw new Error(`Failed to export registrations: ${response.status}`);
     }
 
-    return response.blob();
+    // Extract filename from Content-Disposition header; fall back to eventId
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    const filename = match?.[1] || `event-registrations-${eventId}.csv`;
+
+    return { blob: await response.blob(), filename };
+  },
+
+  downloadRegistrationFiles: async (eventId: string): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
+    const response = await authenticatedFetch(
+      `/portal/events/${eventId}/registrations/files/download`
+    );
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(detail || `Failed to download files: ${response.status}`);
+    }
+
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    const filename = match?.[1] || `${eventId}-files.zip`;
+
+    const errorCount = Number(response.headers.get('X-Download-Errors') || '0');
+
+    return { blob: await response.blob(), filename, errorCount };
   },
 };
