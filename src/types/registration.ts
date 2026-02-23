@@ -5,7 +5,7 @@
  * from domains/events/registrations/models.py
  */
 
-export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending';
+export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending' | 'waitlist';
 
 /**
  * File metadata for uploaded files (resumes, etc.)
@@ -82,7 +82,7 @@ export interface RegistrationDetailResponse {
  * Status update request payload
  */
 export interface RegistrationStatusUpdate {
-  status: 'accepted' | 'rejected';
+  status: 'accepted' | 'rejected' | 'waitlist';
 }
 
 /**
@@ -112,6 +112,7 @@ export interface StatusCounts {
   accepted: number;
   rejected: number;
   confirmed: number;
+  waitlist: number;
   notAttending: number;
 }
 

@@ -70,7 +70,12 @@ export function ApplicationsDashboard({
     setCurrentPage(1);
   }, [activeStatus, searchQuery]);
 
-  const registrations = registrationsData?.registrations || [];
+  const registrations = 
+    activeStatus === 'waitlist'
+    ?  [...(registrationsData?.registrations || [])].sort(
+      (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+    : registrationsData?.registrations || [];
+
   const pagination = registrationsData?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
@@ -170,7 +175,14 @@ export function ApplicationsDashboard({
         userRole={userRole}
         onViewDetails={handleCardClick}
         onStatusUpdate={handleStatusUpdate}
+        activeStatus={activeStatus}
       />
+
+      {activeStatus === 'waitlist' && 
+        <p className="text-sm text-muted-foreground">
+          {counts.waitlist} people on waitlist | {event?.maxCapacity && event?.maxCapacity - (counts.confirmed + counts.accepted)} spots available 
+        </p>
+      }
 
       {/* Pagination */}
       {pagination && pagination.total > 0 && (

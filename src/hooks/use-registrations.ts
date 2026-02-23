@@ -82,6 +82,11 @@ export function useRegistrationCounts(eventId: string) {
     status: 'confirmed',
     limit: 1,
   });
+  const { data: waitlist } = useRegistrations({
+    eventId,
+    status: 'waitlist',
+    limit: 1,
+  });
   const { data: notAttending } = useRegistrations({
     eventId,
     status: 'not_attending',
@@ -93,6 +98,7 @@ export function useRegistrationCounts(eventId: string) {
     accepted: accepted?.pagination.total || 0,
     rejected: rejected?.pagination.total || 0,
     confirmed: confirmed?.pagination.total || 0,
+    waitlist: waitlist?.pagination.total || 0,
     notAttending: notAttending?.pagination.total || 0,
   };
 
