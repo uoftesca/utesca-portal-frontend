@@ -73,7 +73,7 @@ export function ConfirmActionDialog({
 
   const descriptionByAction: Record<typeof actionType, string> = {
     accept: `You are about to accept ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} with an RSVP link to confirm their attendance.`,
-    waitlist: `You are about to waitlist ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} notifying them they have been waitlisted.`,
+    waitlist: `You are about to waitlist ${applicantName}'s application for ${eventTitle}. The applicant will not be notified — this is an internal action only.`,
     reject: `You are about to reject ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail}. This action cannot be undone.`,
   };
   const description = descriptionByAction[actionType];
