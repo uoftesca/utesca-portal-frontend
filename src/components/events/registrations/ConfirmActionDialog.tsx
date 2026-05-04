@@ -21,13 +21,43 @@ import {
 interface ConfirmActionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  actionType: 'accept' | 'reject';
+  actionType: 'accept' | 'reject' | 'waitlist';
   applicantName: string;
   applicantEmail: string;
   eventTitle: string;
   onConfirm: () => void | Promise<void>;
   isPending: boolean;
 }
+
+const ACTION_CONFIG = {
+  accept: {
+    title: 'Accept Application?',
+    confirmButtonText: 'Accept Application',
+    loadingText: 'Accepting...',
+    iconBg: 'bg-amber-500/10',
+    iconColor: 'text-amber-500',
+    buttonVariant: 'default' as const,
+    buttonClass: 'bg-emerald-600 hover:bg-emerald-700',
+  },
+  waitlist: {
+    title: 'Waitlist Application?',
+    confirmButtonText: 'Waitlist Application',
+    loadingText: 'Waitlisting...',
+    iconBg: 'bg-amber-500/10',
+    iconColor: 'text-amber-500',
+    buttonVariant: 'default' as const,
+    buttonClass: 'bg-amber-600 hover:bg-amber-700',
+  },
+  reject: {
+    title: 'Reject Application?',
+    confirmButtonText: 'Reject Application',
+    loadingText: 'Rejecting...',
+    iconBg: 'bg-destructive/10',
+    iconColor: 'text-destructive',
+    buttonVariant: 'destructive' as const,
+    buttonClass: '',
+  },
+};
 
 export function ConfirmActionDialog({
   open,
@@ -39,34 +69,24 @@ export function ConfirmActionDialog({
   onConfirm,
   isPending,
 }: Readonly<ConfirmActionDialogProps>) {
-  const isAccept = actionType === 'accept';
+  const config = ACTION_CONFIG[actionType];
 
-  const title = isAccept ? 'Accept Application?' : 'Reject Application?';
-
-  const description = isAccept
-    ? `You are about to accept ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} with an RSVP link to confirm their attendance.`
-    : `You are about to reject ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail}. This action cannot be undone.`;
-
-  const confirmButtonText = isAccept ? 'Accept Application' : 'Reject Application';
-  const loadingText = isAccept ? 'Accepting...' : 'Rejecting...';
+  const descriptionByAction: Record<typeof actionType, string> = {
+    accept: `You are about to accept ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} with an RSVP link to confirm their attendance.`,
+    waitlist: `You are about to waitlist ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} notifying them they have been waitlisted.`,
+    reject: `You are about to reject ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail}. This action cannot be undone.`,
+  };
+  const description = descriptionByAction[actionType];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                isAccept ? 'bg-amber-500/10' : 'bg-destructive/10'
-              }`}
-            >
-              <AlertTriangle
-                className={`h-5 w-5 ${
-                  isAccept ? 'text-amber-500' : 'text-destructive'
-                }`}
-              />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}`}>
+              <AlertTriangle className={`h-5 w-5 ${config.iconColor}`} />
             </div>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>{config.title}</DialogTitle>
           </div>
           <DialogDescription className="pt-3">
             {description}
@@ -92,12 +112,12 @@ export function ConfirmActionDialog({
             Cancel
           </Button>
           <Button
-            variant={isAccept ? 'default' : 'destructive'}
+            variant={config.buttonVariant}
             onClick={onConfirm}
             disabled={isPending}
-            className={isAccept ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+            className={config.buttonClass}
           >
-            {isPending ? loadingText : confirmButtonText}
+            {isPending ? config.loadingText : config.confirmButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>

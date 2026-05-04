@@ -7,7 +7,7 @@
  */
 
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUpdateRegistrationStatus } from "@/hooks/use-registrations";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
@@ -31,6 +31,7 @@ export function AcceptRejectActions({
 }: Readonly<AcceptRejectActionsProps>) {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showWaitlistDialog, setShowWaitlistDialog] = useState(false);
   const updateStatus = useUpdateRegistrationStatus();
 
   const handleAccept = async () => {
@@ -42,7 +43,6 @@ export function AcceptRejectActions({
       setShowAcceptDialog(false);
       onSuccess?.(result.registration.rsvpLink);
     } catch (error) {
-      // Error will be handled by React Query
       console.error("Failed to accept registration:", error);
     }
   };
@@ -57,6 +57,19 @@ export function AcceptRejectActions({
       onSuccess?.();
     } catch (error) {
       console.error("Failed to reject registration:", error);
+    }
+  };
+
+  const handleWaitlist = async () => {
+    try {
+      await updateStatus.mutateAsync({
+        registrationId,
+        data: { status: "waitlist" },
+      });
+      setShowWaitlistDialog(false);
+      onSuccess?.();
+    } catch (error) {
+      console.error("Failed to waitlist registration:", error);
     }
   };
 
@@ -75,6 +88,15 @@ export function AcceptRejectActions({
           Accept
         </Button>
         <Button
+          onClick={() => setShowWaitlistDialog(true)}
+          disabled={updateStatus.isPending}
+          size={buttonSize}
+          className="bg-amber-600 hover:bg-amber-700"
+        >
+          <Clock className="h-4 w-4" />
+          Waitlist
+        </Button>
+        <Button
           onClick={() => setShowRejectDialog(true)}
           disabled={updateStatus.isPending}
           variant="destructive"
@@ -85,7 +107,6 @@ export function AcceptRejectActions({
         </Button>
       </div>
 
-      {/* Accept Confirmation Dialog */}
       <ConfirmActionDialog
         open={showAcceptDialog}
         onOpenChange={setShowAcceptDialog}
@@ -97,7 +118,17 @@ export function AcceptRejectActions({
         isPending={updateStatus.isPending}
       />
 
-      {/* Reject Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={showWaitlistDialog}
+        onOpenChange={setShowWaitlistDialog}
+        actionType="waitlist"
+        applicantName={applicantName}
+        applicantEmail={applicantEmail}
+        eventTitle={eventTitle}
+        onConfirm={handleWaitlist}
+        isPending={updateStatus.isPending}
+      />
+
       <ConfirmActionDialog
         open={showRejectDialog}
         onOpenChange={setShowRejectDialog}
