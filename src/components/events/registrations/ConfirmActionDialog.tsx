@@ -73,7 +73,7 @@ export function ConfirmActionDialog({
 
   const descriptionByAction: Record<typeof actionType, string> = {
     accept: `You are about to accept ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail} with an RSVP link to confirm their attendance.`,
-    waitlist: `You are about to waitlist ${applicantName}'s application for ${eventTitle}. The applicant will not be notified — this is an internal action only.`,
+    waitlist: `You are about to waitlist ${applicantName}'s application for ${eventTitle}. The applicant will not be notified; this is an internal action only.`,
     reject: `You are about to reject ${applicantName}'s application for ${eventTitle}. An email will be automatically sent to ${applicantEmail}. This action cannot be undone.`,
   };
   const description = descriptionByAction[actionType];
@@ -83,14 +83,14 @@ export function ConfirmActionDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}`}>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}`}
+            >
               <AlertTriangle className={`h-5 w-5 ${config.iconColor}`} />
             </div>
             <DialogTitle>{config.title}</DialogTitle>
           </div>
-          <DialogDescription className="pt-3">
-            {description}
-          </DialogDescription>
+          <DialogDescription className="pt-3">{description}</DialogDescription>
         </DialogHeader>
 
         {/* Applicant Information */}
