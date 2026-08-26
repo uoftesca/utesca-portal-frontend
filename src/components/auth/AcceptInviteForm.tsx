@@ -55,19 +55,17 @@ export default function AcceptInviteForm() {
         const tokenHash = searchParams.get('token_hash');
         const typeParam = searchParams.get('type');
 
-        // If we have a token_hash, verify it with Supabase
-        if (tokenHash && typeParam === 'invite') {
+        const isOnboardingToken =
+          typeParam === 'invite' || typeParam === 'recovery';
+
+        // Invite and recovery links are both valid ways to begin onboarding.
+        if (tokenHash && isOnboardingToken) {
           const { data, error: verifyError } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: 'invite',
+            type: typeParam,
           });
 
-          if (verifyError) {
-            setError('Invalid or expired invite link');
-            return;
-          }
-
-          if (data.session && data.user) {
+          if (!verifyError && data.session && data.user) {
             // Extract user metadata from session
             // Note: Supabase metadata may still be in snake_case, so we need to handle both
             const rawMetadata = data.user.user_metadata as RawUserMetadata;
@@ -94,7 +92,8 @@ export default function AcceptInviteForm() {
           }
         }
 
-        // If no token in URL, check if we already have a session
+        // A used one-time link can still resume the persisted onboarding
+        // session in the same browser.
         const {
           data: { session },
           error: sessionError,

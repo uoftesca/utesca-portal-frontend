@@ -46,7 +46,7 @@ export function OnboardMemberDialog({ onSuccess }: Readonly<OnboardMemberDialogP
   });
 
   const inviteUserMutation = useInviteUser();
-  const { data: departmentsData } = useDepartments({ all: false });
+  const { data: departmentsData } = useDepartments({ all: true });
 
   const departments = departmentsData?.departments || [];
 
