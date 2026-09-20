@@ -1,6 +1,5 @@
 import { TAB_CONFIG } from '../config/tab-config';
-import type { User } from '@/types/team';
-import type { UserRole } from '@/types/user';
+import type { User, UserRole } from '@/types/user';
 
 interface DashboardTabContentProps {
   activeTab: string;

@@ -19,16 +19,18 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ChevronUp, LogOut } from 'lucide-react';
 import { useSignOut } from '@/hooks/use-auth';
 import { TAB_CONFIG } from '../config/tab-config';
-import type { User } from '@/types/team';
+import type { User, UserRole } from '@/types/user';
 
 interface DashboardSidebarProps {
   user: User | null;
+  userRole?: UserRole;
   activeTab: string;
   onTabChange: (tabId: string) => void;
 }
 
 export function DashboardSidebar({
   user,
+  userRole,
   activeTab,
   onTabChange,
 }: DashboardSidebarProps) {
@@ -47,20 +49,25 @@ export function DashboardSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {TAB_CONFIG.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <SidebarMenuItem key={tab.id}>
-                    <SidebarMenuButton
-                      onClick={() => onTabChange(tab.id)}
-                      isActive={activeTab === tab.id}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs font-medium">{tab.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {TAB_CONFIG.reduce((arr, tab) => {
+                if (!tab.needsPerms || userRole === "co_president" || userRole === "vp") {
+                  const Icon = tab.icon;
+
+                  arr.push(
+                    <SidebarMenuItem key={tab.id}>
+                      <SidebarMenuButton
+                        onClick={() => onTabChange(tab.id)}
+                        isActive={activeTab === tab.id}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="text-xs font-medium">{tab.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                }
+
+                return arr;
+              }, [] as React.ReactNode[])}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
