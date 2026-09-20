@@ -25,6 +25,23 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
 
 /**
+ * Generate and return a string for query parameters
+ */
+function buildQueryString(params: Record<string, any> = {}): string {
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.values(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, String(value))
+    }
+  }
+
+  const queryString = query.toString();
+
+  return queryString ? `?${queryString}` : '';
+}
+
+/**
  * Make an authenticated fetch request
  *
  * This is the core auth logic used by all API calls.
@@ -39,7 +56,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/a
  */
 async function authenticatedFetch(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  queryParams: Record<string, any> = {}
 ): Promise<Response> {
   const supabase = getSupabaseClient();
 
@@ -50,8 +68,10 @@ async function authenticatedFetch(
     throw new Error('No access token available. Please sign in.');
   }
 
+  const queryString = buildQueryString(queryParams);
+
   // Make request with access token
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}${queryString}`, {
     ...options,
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
@@ -77,15 +97,20 @@ async function authenticatedFetch(
  */
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  queryParams?: Record<string, any>
 ): Promise<T> {
-  const response = await authenticatedFetch(endpoint, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
+  const response = await authenticatedFetch(
+    endpoint,
+    {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
     },
-  });
+    queryParams
+  );
 
   // Handle error responses
   if (!response.ok) {
@@ -101,17 +126,18 @@ async function apiRequest<T>(
   return response.json();
 }
 
+
 /**
  * API Client
  */
 export const apiClient = {
   // Departments
   getDepartments: async (params?: GetDepartmentsParams) => {
-    const query = new URLSearchParams();
-    if (params?.year) query.append('year', params.year.toString());
-    if (params?.all) query.append('all', 'true');
-    const queryString = query.toString() ? `?${query.toString()}` : '';
-    return apiRequest(`/departments${queryString}`);
+    return apiRequest(
+      '/departments',
+      {},
+      { year: params?.year, all: params?.all }
+    );
   },
 
   getAvailableYears: async () => {
@@ -132,15 +158,18 @@ export const apiClient = {
 
   // Users
   getUsers: async (params?: GetUsersParams) => {
-    const query = new URLSearchParams();
-    if (params?.departmentId) query.append('department_id', params.departmentId);
-    if (params?.role) query.append('role', params.role);
-    if (params?.year) query.append('year', params.year.toString());
-    if (params?.search) query.append('search', params.search);
-    if (params?.page) query.append('page', params.page.toString());
-    if (params?.pageSize) query.append('page_size', params.pageSize.toString());
-    const queryString = query.toString() ? `?${query.toString()}` : '';
-    return apiRequest(`/users${queryString}`);
+    return apiRequest(
+      '/users',
+      {},
+      {
+        department_id: params?.departmentId,
+        role: params?.role,
+        year: params?.year,
+        search: params?.search,
+        page: params?.page,
+        page_size: params?.pageSize
+      }
+    );
   },
 
   getUserById: async (userId: string) => {
@@ -162,10 +191,11 @@ export const apiClient = {
 
   // Events
   getEvents: async (params?: GetEventsParams) => {
-    const query = new URLSearchParams();
-    if (params?.status) query.append('status', params.status);
-    const queryString = query.toString() ? `?${query.toString()}` : '';
-    return apiRequest(`/events${queryString}`);
+    return apiRequest(
+      '/events',
+      {},
+      { status: params?.status }
+    );
   },
 
   getEventById: async (eventId: string) => {
@@ -194,15 +224,14 @@ export const apiClient = {
 
   // Event Registrations
   getEventRegistrations: async (params: GetRegistrationsParams) => {
-    const query = new URLSearchParams();
-    if (params.status) query.append('status', params.status);
-    if (params.page) query.append('page', params.page.toString());
-    if (params.limit) query.append('limit', params.limit.toString());
-    if (params.search) query.append('search', params.search);
-
-    const queryString = query.toString() ? `?${query.toString()}` : '';
     return apiRequest(
-      `/portal/events/${params.eventId}/registrations${queryString}`
+      `/portal/events/${params.eventId}/registrations`, {},
+      {
+        status: params.status,
+        page: params.page,
+        limit: params.limit,
+        search: params.search
+      }
     );
   },
 
@@ -221,12 +250,8 @@ export const apiClient = {
   },
 
   exportRegistrations: async (eventId: string, status?: RegistrationStatus): Promise<{ blob: Blob; filename: string }> => {
-    const query = new URLSearchParams();
-    if (status) query.append('status', status);
-    const queryString = query.toString() ? `?${query.toString()}` : '';
-
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/export${queryString}`
+      `/portal/events/${eventId}/registrations/export`, {}, { status: status }
     );
 
     if (!response.ok) {
@@ -259,4 +284,12 @@ export const apiClient = {
 
     return { blob: await response.blob(), filename, errorCount };
   },
+
+  checkIn: async (registrationId: string, token: string) => {
+    return apiRequest(
+      `/registrations/${registrationId}/check-in`,
+      { method: 'POST', },
+      { token: token }
+    );
+  }
 };
