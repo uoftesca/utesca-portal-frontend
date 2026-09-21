@@ -30,7 +30,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/a
 function buildQueryString(params: Record<string, any> = {}): string {
   const query = new URLSearchParams();
 
-  for (const [key, value] of Object.values(params)) {
+  for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {
       query.append(key, String(value))
     }
