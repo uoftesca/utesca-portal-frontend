@@ -286,10 +286,9 @@ export const apiClient = {
   },
 
   checkIn: async (registrationId: string, token: string) => {
-    return apiRequest(
-      `/registrations/${registrationId}/check-in`,
-      { method: 'POST', },
-      { token: token }
-    );
+    return apiRequest(`/portal/registrations/${registrationId}/check-in`,{
+      method: 'POST',
+      body: JSON.stringify({ticket_token: token}),
+    });
   }
 };

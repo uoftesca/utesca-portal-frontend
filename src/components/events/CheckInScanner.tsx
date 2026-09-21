@@ -8,28 +8,45 @@ import { useEffect } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { apiClient } from '@/lib/api-client';
 
+interface TicketInfo {
+  registrationId: string,
+  ticketToken: string
+};
+
 export function CheckInScanner() {
   useEffect(() => {
-    function onScanSuccess(text: string) {
-      const info = text.split('_');
-      if (info.length !== 2) return;
+    let scanner: Html5QrcodeScanner;
 
-      const [registrationId, token] = info;
+    async function onScanSuccess(text: string) {
+      scanner.pause(true);
 
-      // Do some validation here before wasting an API request
-      // Add a cooldown
+      try {
+        const info = JSON.parse(text) as TicketInfo;
 
-      apiClient.checkIn(registrationId, token);
+        console.log(info);
+
+        await apiClient.checkIn(info.registrationId, info.ticketToken);
+
+      } catch (error) {
+        // TODO: Add proper error popup here
+        console.error(error);
+      }
+
+      scanner.resume();
     }
 
-    const html5QrcodeScanner = new Html5QrcodeScanner(
+    scanner = new Html5QrcodeScanner(
       "qr-reader",
-      { fps: 10, qrbox: {width: 250, height: 250} },
+      { fps: 10, qrbox: {width: 500, height: 500} },
       false
-    )
+    );
 
-    html5QrcodeScanner.render(onScanSuccess, () => {})
-  })
+    scanner.render(onScanSuccess, () => { console.log("Fail"); });
+
+    return () => {
+      scanner.clear();
+    }
+  }, []);
 
   return <div id="qr-reader"></div>
 }
