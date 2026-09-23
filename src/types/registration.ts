@@ -150,3 +150,13 @@ export interface TicketInfo {
 export interface CheckInRequest {
   ticket_token: string;
 };
+
+/**
+ * Response type for registration check-in
+ */
+export interface CheckInResponse {
+  id: string;
+  checkedIn: boolean,
+  checkedInAt: string | null;
+  checkedInBy: string | null;
+};

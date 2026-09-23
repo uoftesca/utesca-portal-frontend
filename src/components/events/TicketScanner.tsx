@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Html5Qrcode } from 'html5-qrcode';
-import { apiClient } from '@/lib/api-client';
+import { useCheckIn } from '@/hooks/use-registrations';
 import { TicketInfo } from '@/types/registration';
 
 export function TicketScanner() {
@@ -20,6 +20,7 @@ export function TicketScanner() {
   const [isStarting, setIsStarting] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
+  const checkInMutation = useCheckIn();
   const onCooldownRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -52,25 +53,20 @@ export function TicketScanner() {
 
       const info = JSON.parse(text) as TicketInfo;
 
-      await apiClient.checkIn(
-        info.registrationId,
-        { ticket_token: info.ticketToken }
-      ).catch((error) => {
-        console.error("Failed to check in:", error);
-      });
-
-      // TODO: Add success toast notification
+      try {
+        await checkInMutation.mutateAsync(
+          { registrationId: info.registrationId, data: {ticket_token: info.ticketToken} }
+        )
+      } catch {}
 
       setTimeout(() => {
+        checkInMutation.reset();
         onCooldownRef.current = false;
-
         scannerRef.current?.resume();
-      }, 1000);
+      }, 1500);
 
-    } catch (error) {
-      // TODO: Add error toast notification
-
-      console.error(error);
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -90,8 +86,8 @@ export function TicketScanner() {
       },
       onScanSuccess,
       () => {}
-    ).catch((error) => {
-      console.error('Failed to start scanner:', error);
+    ).catch((e) => {
+      console.error('Failed to start scanner:', e);
     });
 
     setIsStarting(false);
@@ -103,8 +99,8 @@ export function TicketScanner() {
     if (isStarting) return;
 
     if (scannerRef.current?.isScanning) {
-      await scannerRef.current.stop().catch((error) => {
-        console.error('Failed to stop scanner:', error);
+      await scannerRef.current.stop().catch((e) => {
+        console.error('Failed to stop scanner:', e);
       });
     }
 
@@ -117,7 +113,28 @@ export function TicketScanner() {
   // TODO: Add placeholder text when camera is not active
   return (
     <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
+      {checkInMutation.isSuccess && (
+        <div className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-destructive text-sm p-3 rounded-md">
+          {/* TODO: Replace registration id with registration name or something */}
+          Successfully checked in registration {checkInMutation.data.id}
+        </div>
+      )}
+
+      {checkInMutation.isError && (
+        <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+          {checkInMutation.error instanceof Error
+            ? checkInMutation.error.message
+            : 'Failed to check in'}
+        </div>
+      )}
+
       <div className={`w-full ${aspectClass} overflow-hidden rounded-xl bg-muted border border-border relative flex items-center justify-center`}>
+        {(!isScanning || isStarting) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/90 backdrop-blur-xs text-muted-foreground text-sm p-4 text-center z-10">
+            {isStarting ? "Starting camera..." : "Camera is off."}
+          </div>
+        )}
+
         <div id="qr-reader" className="w-full h-auto max-w-full max-h-full" />
       </div>
 
@@ -125,7 +142,7 @@ export function TicketScanner() {
         onClick={isScanning ? stopScanner : startScanner}
         className="px-6 py-2.5"
       >
-        {isStarting ? "Loading..." : (isScanning ? "Stop Camera" : "Start Camera")}
+        {isScanning ? "Stop Camera" : "Start Camera"}
       </Button>
     </div>
   )

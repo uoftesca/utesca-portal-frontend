@@ -14,6 +14,8 @@ import type {
   RegistrationStatusUpdateResponse,
   GetRegistrationsParams,
   StatusCounts,
+  CheckInRequest,
+  CheckInResponse,
 } from '@/types/registration';
 
 /**
@@ -187,5 +189,28 @@ export function useDownloadRegistrationFiles() {
         console.warn(`[Download Files] ZIP created with ${errorCount} file(s) missing due to download errors.`);
       }
     },
+  });
+}
+
+/**
+ * Hook to make a check-in request for a registration
+ */
+export function useCheckIn() {
+  const queryClient = useQueryClient();
+
+  return useMutation<CheckInResponse, Error, { registrationId: string, data: CheckInRequest }>({
+    mutationFn: async ({ registrationId, data }) => {
+      const response = await apiClient.checkIn(registrationId, data);
+      return response as CheckInResponse;
+    },
+    onSuccess: (response, variables) => {
+      // TODO: Make API response include full event information and then:
+      // 1. Invalidate the cache list elements with the same eventId
+      // 2. Use setQueryData to add the data to the cache for the registrationId key
+
+      queryClient.invalidateQueries({
+        queryKey: registrationKeys.detail(variables.registrationId)
+      });
+    }
   });
 }
