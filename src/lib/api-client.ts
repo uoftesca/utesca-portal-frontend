@@ -20,6 +20,7 @@ import {
   GetRegistrationsParams,
   RegistrationStatusUpdate,
   RegistrationStatus,
+  CheckInRequest,
 } from '@/types/registration';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
@@ -285,10 +286,10 @@ export const apiClient = {
     return { blob: await response.blob(), filename, errorCount };
   },
 
-  checkIn: async (registrationId: string, token: string) => {
+  checkIn: async (registrationId: string, data: CheckInRequest) => {
     return apiRequest(`/portal/registrations/${registrationId}/check-in`,{
       method: 'POST',
-      body: JSON.stringify({ticket_token: token}),
+      body: JSON.stringify(data),
     });
   }
 };

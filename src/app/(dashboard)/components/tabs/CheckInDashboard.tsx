@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckInScanner } from '@/components/events/CheckInScanner';
+import { TicketScanner } from '@/components/events/CheckInScanner';
 
 export function CheckInDashboard() {
   return (
@@ -18,7 +18,7 @@ export function CheckInDashboard() {
           <CardTitle>Scan a Ticket</CardTitle>
         </CardHeader>
         <CardContent>
-          <CheckInScanner></CheckInScanner>
+          <TicketScanner></TicketScanner>
         </CardContent>
       </Card>
     </div>
