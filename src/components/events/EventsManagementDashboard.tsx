@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/hooks/use-events';
 import { CreateEventDialog } from './CreateEventDialog';
+import { ScanTicketsDialog } from './ScanTicketsDialog';
 import { EventCard } from './EventCard';
 import type { Event } from '@/types/event';
 import type { UserRole } from '@/types/team';
@@ -30,7 +31,7 @@ export function EventsManagementDashboard({
   const [activeTab, setActiveTab] = useState('all');
 
   // Determine if user can create events (VPs and Co-presidents)
-  const canCreate = userRole === 'vp' || userRole === 'co_president';
+  const isExec = userRole === 'vp' || userRole === 'co_president';
 
   // Fetch events based on active tab
   // For 'drafts' tab, we fetch all events and filter client-side
@@ -132,7 +133,7 @@ export function EventsManagementDashboard({
           <p className="text-sm text-muted-foreground max-w-sm">
             {getEmptyMessage()}
           </p>
-          {canCreate && (
+          {isExec && (
             <div className="mt-6">
               <CreateEventDialog />
             </div>
@@ -164,7 +165,10 @@ export function EventsManagementDashboard({
             Manage and organize UTESCA events
           </p>
         </div>
-        {canCreate && <CreateEventDialog />}
+        <div className="flex flex-row gap-4">
+          {isExec && <CreateEventDialog />}
+          {isExec && <ScanTicketsDialog />}
+        </div>
       </div>
 
       {/* Tabs */}

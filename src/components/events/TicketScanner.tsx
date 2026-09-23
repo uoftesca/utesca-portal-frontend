@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Check-In Scanner Component
  *
@@ -5,11 +7,15 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Html5Qrcode } from 'html5-qrcode';
 import { apiClient } from '@/lib/api-client';
 import { TicketInfo } from '@/types/registration';
 
 export function TicketScanner() {
+  const isMobile = useIsMobile();
+
   const [isScanning, setIsScanning] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -74,7 +80,7 @@ export function TicketScanner() {
     setIsStarting(true);
     setIsScanning(true);
 
-    const qrBoxSize = window.innerWidth < 640 ? 200 : 250;
+    const qrBoxSize = isMobile ? 200 : 250;
 
     await scannerRef.current?.start(
       { 'facingMode': 'environment' },
@@ -105,20 +111,22 @@ export function TicketScanner() {
     setIsScanning(false);
   }
 
+  const aspectClass = isMobile ? "aspect-[3/4]" : "aspect-[4/3]"
+
   // TODO: Improve style to match rest of website (hover effect, corners, etc.)
   // TODO: Add placeholder text when camera is not active
   return (
     <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
-      <div className="w-full aspect-[4/3] overflow-hidden rounded-xl bg-muted border border-border relative flex items-center justify-center">
-        <div id="qr-reader" className="w-full" />
+      <div className={`w-full ${aspectClass} overflow-hidden rounded-xl bg-muted border border-border relative flex items-center justify-center`}>
+        <div id="qr-reader" className="w-full h-auto max-w-full max-h-full" />
       </div>
 
-      <button 
+      <Button
         onClick={isScanning ? stopScanner : startScanner}
-        className="px-6 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded-lg font-medium transition-colors"
+        className="px-6 py-2.5"
       >
         {isStarting ? "Loading..." : (isScanning ? "Stop Camera" : "Start Camera")}
-      </button>
+      </Button>
     </div>
   )
 }

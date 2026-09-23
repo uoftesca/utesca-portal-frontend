@@ -1,4 +1,4 @@
-import { Home, Bell, Calendar, Users, BarChart3, Settings, UserCircle, ScanIcon } from 'lucide-react';
+import { Home, Bell, Calendar, Users, BarChart3, Settings, UserCircle } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { UserRole } from '@/types/user';
 import type { User } from '@/types/team';
@@ -11,7 +11,6 @@ import { SystemSettingsDashboard } from '../components/tabs/SystemSettingsDashbo
 import { MyProfileDashboard } from '../components/tabs/MyProfileDashboard';
 import { EventsManagementDashboard } from '@/components/events';
 import { TeamManagementDashboard } from '@/components/team';
-import { CheckInDashboard } from '../components/tabs/CheckInDashboard';
 
 /**
  * Props interface that all tab components must implement
@@ -90,12 +89,5 @@ export const TAB_CONFIG: TabConfig[] = [
     icon: UserCircle,
     component: MyProfileDashboard,
     needsPerms: false,
-  },
-  {
-    id: 'check-in',
-    label: 'Check-In',
-    icon: ScanIcon,
-    component: CheckInDashboard,
-    needsPerms: true,
   }
 ];
