@@ -86,8 +86,9 @@ export function TicketScanner() {
       },
       onScanSuccess,
       () => {}
-    ).catch((e) => {
-      console.error('Failed to start scanner:', e);
+    ).catch(() => {
+      setIsStarting(false);
+      setIsScanning(false);
     });
 
     setIsStarting(false);
@@ -109,8 +110,6 @@ export function TicketScanner() {
 
   const aspectClass = isMobile ? "aspect-[3/4]" : "aspect-[4/3]"
 
-  // TODO: Improve style to match rest of website (hover effect, corners, etc.)
-  // TODO: Add placeholder text when camera is not active
   return (
     <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
       {checkInMutation.isSuccess && (
