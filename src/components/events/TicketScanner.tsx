@@ -38,7 +38,7 @@ export function TicketScanner() {
 
         try {
           scanner.clear();
-        } catch (e) {}
+        } catch {}
       }
     }
   }, []);

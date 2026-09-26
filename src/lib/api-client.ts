@@ -28,7 +28,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/a
 /**
  * Generate and return a string for query parameters
  */
-function buildQueryString(params: Record<string, any> = {}): string {
+function buildQueryString(params: Record<string, string | number | boolean | undefined> = {}): string {
   const query = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
@@ -58,7 +58,7 @@ function buildQueryString(params: Record<string, any> = {}): string {
 async function authenticatedFetch(
   endpoint: string,
   options: RequestInit = {},
-  queryParams: Record<string, any> = {}
+  queryParams?: Record<string, string | number | boolean | undefined>
 ): Promise<Response> {
   const supabase = getSupabaseClient();
 
@@ -99,7 +99,7 @@ async function authenticatedFetch(
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  queryParams?: Record<string, any>
+  queryParams?: Record<string, string | number | boolean | undefined>
 ): Promise<T> {
   const response = await authenticatedFetch(
     endpoint,
