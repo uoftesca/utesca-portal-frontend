@@ -29,6 +29,7 @@ export interface TabConfig {
   label: string;
   icon: ComponentType<{ className?: string }>;
   component: ComponentType<TabComponentProps>;
+  needsPerms: boolean;
 }
 
 /**
@@ -45,41 +46,48 @@ export const TAB_CONFIG: TabConfig[] = [
     label: 'Dashboard',
     icon: Home,
     component: WelcomeDashboard,
+    needsPerms: false,
   },
   {
     id: 'announcements',
     label: 'Announcements',
     icon: Bell,
     component: AnnouncementsDashboard,
+    needsPerms: false,
   },
   {
     id: 'events',
     label: 'Events',
     icon: Calendar,
     component: EventsManagementDashboard,
+    needsPerms: false,
   },
   {
     id: 'team-management',
     label: 'Team Management',
     icon: Users,
     component: TeamManagementDashboard,
+    needsPerms: false,
   },
   {
     id: 'analytics',
     label: 'Analytics',
     icon: BarChart3,
     component: AnalyticsDashboard,
+    needsPerms: false,
   },
   {
     id: 'system-settings',
     label: 'System Settings',
     icon: Settings,
     component: SystemSettingsDashboard,
+    needsPerms: false,
   },
   {
     id: 'my-profile',
     label: 'My Profile',
     icon: UserCircle,
     component: MyProfileDashboard,
-  },
+    needsPerms: false,
+  }
 ];

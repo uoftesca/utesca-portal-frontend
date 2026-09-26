@@ -25,6 +25,7 @@ export function DashboardLayout({
     <SidebarProvider>
       <DashboardSidebar
         user={user}
+        userRole={user?.role}
         activeTab={activeTab}
         onTabChange={onTabChange}
       />

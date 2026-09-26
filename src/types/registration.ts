@@ -135,3 +135,28 @@ export interface RegistrationFormSchema {
   autoAccept?: boolean;
   fields: FormField[];
 }
+
+/**
+ * Info for a registration ticket
+ */
+export interface TicketInfo {
+  registrationId: string;
+  ticketToken: string;
+};
+
+/**
+ * Request type for registration check-in
+ */
+export interface CheckInRequest {
+  ticket_token: string;
+};
+
+/**
+ * Response type for registration check-in
+ */
+export interface CheckInResponse {
+  id: string;
+  checkedIn: boolean,
+  checkedInAt: string | null;
+  checkedInBy: string | null;
+};
