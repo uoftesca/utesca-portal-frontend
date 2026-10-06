@@ -193,6 +193,15 @@ export function useDownloadRegistrationFiles() {
 }
 
 /**
+ * Hook to queue reminder emails for all unique confirmed registrants.
+ */
+export function useNotifyConfirmedRegistrants() {
+  return useMutation<{ success: boolean; queued: number }, Error, { eventId: string }>({
+    mutationFn: ({ eventId }) => apiClient.notifyConfirmedRegistrants(eventId),
+  });
+}
+
+/**
  * Hook to make a check-in request for a registration
  */
 export function useCheckIn() {

@@ -286,6 +286,12 @@ export const apiClient = {
     return { blob: await response.blob(), filename, errorCount };
   },
 
+  notifyConfirmedRegistrants: async (eventId: string): Promise<{ success: boolean; queued: number }> => {
+    return apiRequest(`/portal/events/${eventId}/registrations/notify`, {
+      method: 'POST',
+    });
+  },
+
   checkIn: async (registrationId: string, data: CheckInRequest) => {
     return apiRequest(`/portal/registrations/${registrationId}/check-in`,{
       method: 'POST',

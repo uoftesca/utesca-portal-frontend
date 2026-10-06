@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, Download, Archive } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Download, Archive, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -17,11 +17,13 @@ import {
   useRegistrationCounts,
   useExportRegistrations,
   useDownloadRegistrationFiles,
+  useNotifyConfirmedRegistrants,
 } from '@/hooks/use-registrations';
 import { useEvent } from '@/hooks/use-events';
 import { StatusFilterCards } from './StatusFilterCards';
 import { ApplicationsTable } from './ApplicationsTable';
 import { ApplicationDetailModal } from './ApplicationDetailModal';
+import { EventReminderDialog } from './EventReminderDialog';
 import type { RegistrationStatus } from '@/types/registration';
 import type { UserRole } from '@/types/user';
 
@@ -38,6 +40,8 @@ export function ApplicationsDashboard({
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
+  const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
+  const [reminderFeedback, setReminderFeedback] = useState<string | null>(null);
 
   const pageSize = 10;
 
@@ -64,6 +68,7 @@ export function ApplicationsDashboard({
   // Export / download mutations
   const exportMutation = useExportRegistrations();
   const downloadFilesMutation = useDownloadRegistrationFiles();
+  const notifyMutation = useNotifyConfirmedRegistrants();
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -97,6 +102,22 @@ export function ApplicationsDashboard({
     downloadFilesMutation.mutate({ eventId });
   };
 
+  const handleNotify = () => {
+    setReminderFeedback(null);
+    notifyMutation.mutate(
+      { eventId },
+      {
+        onSuccess: ({ queued }) => {
+          setReminderDialogOpen(false);
+          setReminderFeedback(`Reminder queued for ${queued} unique confirmed registrant${queued === 1 ? '' : 's'}.`);
+        },
+        onError: (mutationError) => {
+          setReminderFeedback(mutationError.message);
+        },
+      }
+    );
+  };
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -120,6 +141,19 @@ export function ApplicationsDashboard({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {(userRole === 'co_president' || userRole === 'vp') && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setReminderFeedback(null);
+                setReminderDialogOpen(true);
+              }}
+              disabled={!event || (counts?.confirmed || 0) === 0}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Notify Email
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={handleExport}
@@ -138,6 +172,12 @@ export function ApplicationsDashboard({
           </Button>
         </div>
       </div>
+
+      {reminderFeedback && (
+        <div className="rounded-md border bg-muted px-4 py-3 text-sm" role="status">
+          {reminderFeedback}
+        </div>
+      )}
 
       {/* Status Filter Cards */}
       {counts && (
@@ -214,6 +254,15 @@ export function ApplicationsDashboard({
         open={!!selectedRegistrationId}
         onOpenChange={(open) => !open && setSelectedRegistrationId(null)}
         userRole={userRole}
+      />
+
+      <EventReminderDialog
+        open={reminderDialogOpen}
+        onOpenChange={setReminderDialogOpen}
+        eventTitle={event?.title || 'this event'}
+        confirmedCount={counts?.confirmed || 0}
+        onConfirm={handleNotify}
+        isPending={notifyMutation.isPending}
       />
     </div>
   );
