@@ -16,6 +16,7 @@ import type {
   StatusCounts,
   CheckInRequest,
   CheckInResponse,
+  AttendanceCounts,
 } from '@/types/registration';
 
 /**
@@ -63,35 +64,53 @@ export function useRegistration(registrationId: string | null) {
  * Hook to calculate status counts from pagination totals
  * Fetches each status with limit=1 to get total counts efficiently
  */
-export function useRegistrationCounts(eventId: string) {
+export function useRegistrationStatusCounts(eventId: string, checkedIn?: boolean) {
   const { data: submitted } = useRegistrations({
     eventId,
     status: 'submitted',
+    checkedIn: checkedIn,
     limit: 1,
   });
   const { data: accepted } = useRegistrations({
     eventId,
     status: 'accepted',
+    checkedIn: checkedIn,
     limit: 1,
   });
   const { data: rejected } = useRegistrations({
     eventId,
     status: 'rejected',
+    checkedIn: checkedIn,
     limit: 1,
   });
   const { data: confirmed } = useRegistrations({
     eventId,
     status: 'confirmed',
+    checkedIn: checkedIn,
     limit: 1,
   });
   const { data: notAttending } = useRegistrations({
     eventId,
     status: 'not_attending',
+    checkedIn: checkedIn,
     limit: 1,
   });
   const { data: waitlist } = useRegistrations({
     eventId,
     status: 'waitlist',
+    checkedIn: checkedIn,
+    limit: 1,
+  });
+  const { data: withdrawn } = useRegistrations({
+    eventId,
+    status: 'withdrawn',
+    checkedIn: checkedIn,
+    limit: 1,
+  });
+  const { data: pendingVerification } = useRegistrations({
+    eventId,
+    status: 'pending_verification',
+    checkedIn: checkedIn,
     limit: 1,
   });
 
@@ -102,6 +121,34 @@ export function useRegistrationCounts(eventId: string) {
     confirmed: confirmed?.pagination.total || 0,
     notAttending: notAttending?.pagination.total || 0,
     waitlist: waitlist?.pagination.total || 0,
+    withdrawn: withdrawn?.pagination.total || 0,
+    pendingVerification: pendingVerification?.pagination.total || 0
+  };
+
+  return { data: counts };
+}
+
+/**
+ * Hook to calculate attendance counts from pagination totals
+ * Fetches each status with limit=1 to get total counts efficiently
+ */
+export function useRegistrationAttendanceCounts(eventId: string, status?: RegistrationStatus) {
+  const { data: attended } = useRegistrations({
+    eventId,
+    status: status,
+    checkedIn: true,
+    limit: 1,
+  });
+  const { data: absent } = useRegistrations({
+    eventId,
+    status: status,
+    checkedIn: false,
+    limit: 1,
+  });
+
+  const counts: AttendanceCounts = {
+    attended: attended?.pagination.total || 0,
+    absent: absent?.pagination.total || 0,
   };
 
   return { data: counts };
@@ -150,9 +197,9 @@ export function useUpdateRegistrationStatus() {
  * Hook to export registrations to CSV
  */
 export function useExportRegistrations() {
-  return useMutation<{ blob: Blob; filename: string }, Error, { eventId: string; status?: RegistrationStatus }>({
-    mutationFn: ({ eventId, status }) => {
-      return apiClient.exportRegistrations(eventId, status);
+  return useMutation<{ blob: Blob; filename: string }, Error, { eventId: string; status?: RegistrationStatus, checkedIn?: boolean }>({
+    mutationFn: ({ eventId, status, checkedIn }) => {
+      return apiClient.exportRegistrations(eventId, status, checkedIn);
     },
     onSuccess: ({ blob, filename }) => {
       const url = globalThis.URL.createObjectURL(blob);
@@ -171,7 +218,7 @@ export function useExportRegistrations() {
  * Hook to download all registration files as a ZIP archive
  */
 export function useDownloadRegistrationFiles() {
-  return useMutation<{ blob: Blob; filename: string; errorCount: number }, Error, { eventId: string }>({
+  return useMutation<{ blob: Blob; filename: string; errorCount: number }, Error, { eventId: string, status?: RegistrationStatus, checkedIn?: boolean }>({
     mutationFn: ({ eventId }) => {
       return apiClient.downloadRegistrationFiles(eventId);
     },
