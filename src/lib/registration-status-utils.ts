@@ -15,16 +15,18 @@ export function getRegistrationStatusVariant(
   switch (status) {
     case 'submitted':
       return 'default';
+    case 'waitlist':
+      return 'secondary';
     case 'accepted':
-      return 'outline';
+      return 'secondary';
     case 'rejected':
       return 'destructive';
     case 'confirmed':
       return 'success';
     case 'not_attending':
-      return 'warning';
-    case 'waitlist':
-      return 'secondary';
+    case 'withdrawn':
+    case 'pending_verification':
+      return 'outline';
     default:
       return 'default';
   }
@@ -34,8 +36,7 @@ export function getRegistrationStatusVariant(
  * Format registration status string for display
  */
 export function formatRegistrationStatus(status: RegistrationStatus): string {
-  if (status === 'not_attending') {
-    return 'Not Attending';
-  }
-  return status.charAt(0).toUpperCase() + status.slice(1);
+  return status.split("_")
+    .map((word) => { return word.charAt(0).toUpperCase() + word.slice(1); })
+    .join(" ");
 }
