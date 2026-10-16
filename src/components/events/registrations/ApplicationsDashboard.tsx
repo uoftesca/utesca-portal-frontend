@@ -14,13 +14,15 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
   useRegistrations,
-  useRegistrationCounts,
+  useRegistrationStatusCounts,
   useExportRegistrations,
   useDownloadRegistrationFiles,
   useNotifyConfirmedRegistrants,
+  useRegistrationAttendanceCounts,
 } from '@/hooks/use-registrations';
 import { useEvent } from '@/hooks/use-events';
 import { StatusFilterCards } from './StatusFilterCards';
+import { AttendanceFilterCards } from './AttendanceFilterCards';
 import { ApplicationsTable } from './ApplicationsTable';
 import { ApplicationDetailModal } from './ApplicationDetailModal';
 import { EventReminderDialog } from './EventReminderDialog';
@@ -37,6 +39,7 @@ export function ApplicationsDashboard({
   userRole,
 }: Readonly<ApplicationsDashboardProps>) {
   const [activeStatus, setActiveStatus] = useState<RegistrationStatus | 'all'>('all');
+  const [activeAttendance, setActiveAttendance] = useState<boolean | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
@@ -57,13 +60,17 @@ export function ApplicationsDashboard({
   } = useRegistrations({
     eventId,
     status: activeStatus === 'all' ? undefined : activeStatus,
+    checkedIn: activeAttendance === 'all' ? undefined : activeAttendance,
     page: currentPage,
     limit: pageSize,
     search: searchQuery || undefined,
   });
 
   // Fetch counts for tabs
-  const { data: counts } = useRegistrationCounts(eventId);
+  const { data: statusCounts } = useRegistrationStatusCounts(eventId);
+  const { data: attendanceCounts } = useRegistrationAttendanceCounts(
+    eventId, activeStatus === 'all' ? undefined : activeStatus
+  );
 
   // Export / download mutations
   const exportMutation = useExportRegistrations();
@@ -73,7 +80,7 @@ export function ApplicationsDashboard({
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeStatus, searchQuery]);
+  }, [activeStatus, activeAttendance, searchQuery]);
 
   const registrations = registrationsData?.registrations || [];
   const pagination = registrationsData?.pagination;
@@ -81,6 +88,10 @@ export function ApplicationsDashboard({
 
   const handleStatusChange = (status: RegistrationStatus | 'all') => {
     setActiveStatus(status);
+  };
+
+  const handleAttendanceChange = (attended: boolean | 'all') => {
+    setActiveAttendance(attended);
   };
 
   const handleCardClick = (registrationId: string) => {
@@ -95,11 +106,16 @@ export function ApplicationsDashboard({
     exportMutation.mutate({
       eventId,
       status: activeStatus === 'all' ? undefined : activeStatus,
+      checkedIn: activeAttendance === 'all' ? undefined : activeAttendance,
     });
   };
 
   const handleDownloadFiles = () => {
-    downloadFilesMutation.mutate({ eventId });
+    downloadFilesMutation.mutate({
+      eventId,
+      status: activeStatus === 'all' ? undefined : activeStatus,
+      checkedIn: activeAttendance === 'all' ? undefined : activeAttendance,
+    });
   };
 
   const handleNotify = () => {
@@ -148,7 +164,7 @@ export function ApplicationsDashboard({
                 setReminderFeedback(null);
                 setReminderDialogOpen(true);
               }}
-              disabled={!event || (counts?.confirmed || 0) === 0}
+              disabled={!event || (statusCounts?.confirmed || 0) === 0}
             >
               <Mail className="h-4 w-4 mr-2" />
               Notify Email
@@ -180,11 +196,20 @@ export function ApplicationsDashboard({
       )}
 
       {/* Status Filter Cards */}
-      {counts && (
+      {statusCounts && (
         <StatusFilterCards
           activeStatus={activeStatus}
           onStatusChange={handleStatusChange}
-          counts={counts}
+          counts={statusCounts}
+        />
+      )}
+
+      {/* Attendance Filter Cards */}
+      {attendanceCounts && (
+        <AttendanceFilterCards
+          activeAttendance={activeAttendance}
+          onAttendanceChange={handleAttendanceChange}
+          counts={attendanceCounts}
         />
       )}
 
@@ -260,7 +285,7 @@ export function ApplicationsDashboard({
         open={reminderDialogOpen}
         onOpenChange={setReminderDialogOpen}
         eventTitle={event?.title || 'this event'}
-        confirmedCount={counts?.confirmed || 0}
+        confirmedCount={statusCounts?.confirmed || 0}
         onConfirm={handleNotify}
         isPending={notifyMutation.isPending}
       />

@@ -8,7 +8,7 @@
  */
 
 import { useState } from "react";
-import { FileX, Copy, Check } from "lucide-react";
+import { FileX, Copy, Check, CheckCircle2, CircleX } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -62,6 +62,7 @@ export function ApplicationsTable({
               <TableHead>Email</TableHead>
               <TableHead>Applied At</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Checked-In</TableHead>
               <TableHead className="w-8"></TableHead>
             </TableRow>
           </TableHeader>
@@ -76,6 +77,9 @@ export function ApplicationsTable({
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-20" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-20" />
@@ -128,6 +132,7 @@ export function ApplicationsTable({
             <TableHead className="min-w-[200px]">Email</TableHead>
             <TableHead className="min-w-[200px]">Applied At</TableHead>
             <TableHead className="min-w-[100px]">Status</TableHead>
+            <TableHead className="min-w-[100px]">Checked-In</TableHead>
             <TableHead className="w-8"></TableHead>
           </TableRow>
         </TableHeader>
@@ -178,6 +183,12 @@ export function ApplicationsTable({
                 <TableCell className="text-sm">{appliedAt}</TableCell>
                 <TableCell>
                   <RegistrationStatusBadge status={registration.status} />
+                </TableCell>
+                <TableCell>
+                  {registration.checkedIn ?
+                    <CheckCircle2 className='w-6 h-6 text-emerald-600' /> :
+                    <CircleX className='w-6 h-6 text-muted-foreground' />
+                  }
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <ApplicationRowActions
