@@ -229,6 +229,7 @@ export const apiClient = {
       `/portal/events/${params.eventId}/registrations`, {},
       {
         status: params.status,
+        checked_in: params.checkedIn,
         page: params.page,
         limit: params.limit,
         search: params.search
@@ -250,9 +251,9 @@ export const apiClient = {
     });
   },
 
-  exportRegistrations: async (eventId: string, status?: RegistrationStatus): Promise<{ blob: Blob; filename: string }> => {
+  exportRegistrations: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/export`, {}, { status: status }
+      `/portal/events/${eventId}/registrations/export`, {}, { status: status, checkedIn: checkedIn }
     );
 
     if (!response.ok) {
@@ -267,9 +268,9 @@ export const apiClient = {
     return { blob: await response.blob(), filename };
   },
 
-  downloadRegistrationFiles: async (eventId: string): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
+  downloadRegistrationFiles: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/files/download`
+      `/portal/events/${eventId}/registrations/files/download`, {}, { status: status, checkedIn: checkedIn }
     );
 
     if (!response.ok) {
