@@ -13,15 +13,19 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { useCheckIn } from '@/hooks/use-registrations';
 import { TicketInfo } from '@/types/registration';
 
+const STOP_COOLDOWN_MS = 500;
+const SCAN_COOLDOWN_MS = 1500;
+
 export function TicketScanner() {
   const isMobile = useIsMobile();
 
   const [isScanning, setIsScanning] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const onStopCooldownRef = useRef<boolean>(false);
 
   const checkInMutation = useCheckIn();
-  const onCooldownRef = useRef<boolean>(false);
+  const onScanCooldownRef = useRef<boolean>(false);
 
   useEffect(() => {
     scannerRef.current = new Html5Qrcode("qr-reader");
@@ -44,10 +48,10 @@ export function TicketScanner() {
   }, []);
 
   const onScanSuccess = async (text: string) => {
-    if (onCooldownRef.current) return;
+    if (onScanCooldownRef.current) return;
 
     try {
-      onCooldownRef.current = true;
+      onScanCooldownRef.current = true;
 
       if (scannerRef.current?.isScanning) scannerRef.current.pause(true);
 
@@ -60,19 +64,16 @@ export function TicketScanner() {
       } catch {}
 
       setTimeout(() => {
-        checkInMutation.reset();
-        onCooldownRef.current = false;
+        onScanCooldownRef.current = false;
         scannerRef.current?.resume();
-      }, 1500);
-
-    } catch (e) {
-      console.error(e);
-    }
+      }, SCAN_COOLDOWN_MS);
+    } catch {}
   }
 
   const startScanner = async () => {
     if (!scannerRef.current || scannerRef.current.isScanning || isScanning) return;
 
+    onStopCooldownRef.current = true;
     setIsStarting(true);
     setIsScanning(true);
 
@@ -92,12 +93,12 @@ export function TicketScanner() {
     });
 
     setIsStarting(false);
+
+    setTimeout(() => { onStopCooldownRef.current = false; }, STOP_COOLDOWN_MS);
   }
 
   const stopScanner = async () => {
-    // TODO: Improve checks (and probably add cooldown) to prevent pressing stop right after start from breaking the scanner
-
-    if (isStarting) return;
+    if (isStarting || onStopCooldownRef.current) return;
 
     if (scannerRef.current?.isScanning) {
       await scannerRef.current.stop().catch((e) => {
@@ -114,8 +115,8 @@ export function TicketScanner() {
     <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
       {checkInMutation.isSuccess && (
         <div className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-destructive text-sm p-3 rounded-md">
-          {/* TODO: Replace registration id with registration name or something */}
-          Successfully checked in registration {checkInMutation.data.id}
+          {/* TODO: Add registration name to success message */}
+          Successfully checked in registration
         </div>
       )}
 
