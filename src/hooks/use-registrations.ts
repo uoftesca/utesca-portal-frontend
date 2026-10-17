@@ -219,8 +219,8 @@ export function useExportRegistrations() {
  */
 export function useDownloadRegistrationFiles() {
   return useMutation<{ blob: Blob; filename: string; errorCount: number }, Error, { eventId: string, status?: RegistrationStatus, checkedIn?: boolean }>({
-    mutationFn: ({ eventId }) => {
-      return apiClient.downloadRegistrationFiles(eventId);
+    mutationFn: ({ eventId, status, checkedIn }) => {
+      return apiClient.downloadRegistrationFiles(eventId, status, checkedIn);
     },
     onSuccess: ({ blob, filename, errorCount }) => {
       const url = globalThis.URL.createObjectURL(blob);

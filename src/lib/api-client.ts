@@ -253,7 +253,7 @@ export const apiClient = {
 
   exportRegistrations: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/export`, {}, { status: status, checkedIn: checkedIn }
+      `/portal/events/${eventId}/registrations/export`, {}, { status: status, checked_in: checkedIn }
     );
 
     if (!response.ok) {
@@ -270,7 +270,7 @@ export const apiClient = {
 
   downloadRegistrationFiles: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/files/download`, {}, { status: status, checkedIn: checkedIn }
+      `/portal/events/${eventId}/registrations/files/download`, {}, { status: status, checked_in: checkedIn }
     );
 
     if (!response.ok) {
