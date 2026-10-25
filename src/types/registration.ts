@@ -138,8 +138,8 @@ export interface FormFieldValidation {
   minLength?: number;
   maxLength?: number;
   pattern?: FieldValidationPattern;
-  allowedTypes?: FieldValidationAllowedType;
   maxSize?: number;
+  allowedTypes?: FieldValidationAllowedType[];
 }
 
 export type FormFieldType = "text" | "textarea" | "select" | "radio" | "checkbox" | "file";
