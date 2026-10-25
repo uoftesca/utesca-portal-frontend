@@ -144,6 +144,7 @@ export interface FormField {
 export interface RegistrationFormSchema {
   autoAccept?: boolean;
   fields: FormField[];
+  editable?: string[];
 }
 
 export interface RegistrationUpdateResponse {
