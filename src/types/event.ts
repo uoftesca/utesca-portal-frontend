@@ -20,6 +20,7 @@ export interface BaseEventFields {
   title?: string;
   description?: string;
   dateTime?: string;
+  endDateTime?: string;
   location?: string;
   registrationDeadline?: string;
   status?: EventStatus;
@@ -55,6 +56,7 @@ export interface Event {
   title: string;
   description: string | null;
   dateTime: string;
+  endDateTime: string | null;
   location: string | null;
   registrationDeadline: string | null;
   status: EventStatus;

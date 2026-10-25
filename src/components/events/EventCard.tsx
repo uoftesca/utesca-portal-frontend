@@ -83,7 +83,10 @@ export function EventCard({ event, onClick }: Readonly<EventCardProps>) {
         </p>
         <div className="flex items-center text-xs text-muted-foreground pt-1">
           <Calendar className="w-3 h-3 mr-1" />
-          {formatDateTime(event.dateTime)}
+          <span>
+            {formatDateTime(event.dateTime)}
+            {event.endDateTime && ` – ${formatDateTime(event.endDateTime)}`}
+          </span>
         </div>
         {event.status !== 'published' && (
           <div>
