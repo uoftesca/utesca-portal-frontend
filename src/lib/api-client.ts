@@ -229,6 +229,7 @@ export const apiClient = {
       `/portal/events/${params.eventId}/registrations`, {},
       {
         status: params.status,
+        checked_in: params.checkedIn,
         page: params.page,
         limit: params.limit,
         search: params.search
@@ -261,9 +262,9 @@ export const apiClient = {
     });
   },
 
-  exportRegistrations: async (eventId: string, status?: RegistrationStatus): Promise<{ blob: Blob; filename: string }> => {
+  exportRegistrations: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/export`, {}, { status: status }
+      `/portal/events/${eventId}/registrations/export`, {}, { status: status, checked_in: checkedIn }
     );
 
     if (!response.ok) {
@@ -278,9 +279,9 @@ export const apiClient = {
     return { blob: await response.blob(), filename };
   },
 
-  downloadRegistrationFiles: async (eventId: string): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
+  downloadRegistrationFiles: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string; errorCount: number }> => {
     const response = await authenticatedFetch(
-      `/portal/events/${eventId}/registrations/files/download`
+      `/portal/events/${eventId}/registrations/files/download`, {}, { status: status, checked_in: checkedIn }
     );
 
     if (!response.ok) {
@@ -295,6 +296,12 @@ export const apiClient = {
     const errorCount = Number(response.headers.get('X-Download-Errors') || '0');
 
     return { blob: await response.blob(), filename, errorCount };
+  },
+
+  notifyConfirmedRegistrants: async (eventId: string): Promise<{ success: boolean; queued: number }> => {
+    return apiRequest(`/portal/events/${eventId}/registrations/notify`, {
+      method: 'POST',
+    });
   },
 
   checkIn: async (registrationId: string, data: CheckInRequest) => {

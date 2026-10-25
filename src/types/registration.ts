@@ -5,7 +5,8 @@
  * from domains/events/registrations/models.py
  */
 
-export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending' | 'waitlist';
+export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending' | 'waitlist' |
+  'withdrawn' | 'pending_verification';
 
 /**
  * File metadata for uploaded files (resumes, etc.)
@@ -99,6 +100,7 @@ export interface RegistrationStatusUpdateResponse {
 export interface GetRegistrationsParams {
   eventId: string;
   status?: RegistrationStatus;
+  checkedIn?: boolean;
   page?: number;
   limit?: number;
   search?: string;
@@ -114,6 +116,16 @@ export interface StatusCounts {
   confirmed: number;
   notAttending: number;
   waitlist: number;
+  withdrawn: number;
+  pendingVerification: number;
+}
+
+/**
+ * Attendance breakdown for tab badge counts
+ */
+export interface AttendanceCounts {
+  attended: number;
+  absent: number;
 }
 
 /**

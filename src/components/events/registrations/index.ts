@@ -6,6 +6,7 @@
 
 // Main components
 export { ApplicationsDashboard } from './ApplicationsDashboard';
+export { EventReminderDialog } from './EventReminderDialog';
 export { ApplicationDetailModal } from './ApplicationDetailModal';
 export { StatusFilterCards } from './StatusFilterCards';
 export { ApplicationsTable } from './ApplicationsTable';
