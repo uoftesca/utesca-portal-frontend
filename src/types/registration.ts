@@ -128,26 +128,35 @@ export interface AttendanceCounts {
   absent: number;
 }
 
+export type FieldValidationPattern = "name" | "fullName" | "email" | "uoftEmail" | "utorid" | "phoneNumber";
+export type FieldValidationAllowedType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif";
+
 /**
- * Form field definition in registration form schema
+ * Form field validation schema structure
  */
 export interface FormFieldValidation {
   minLength?: number;
   maxLength?: number;
-  pattern?: string;
+  pattern?: FieldValidationPattern;
+  allowedTypes?: FieldValidationAllowedType;
   maxSize?: number;
-  allowedTypes?: string[];
 }
 
+export type FormFieldType = "text" | "textarea" | "select" | "radio" | "checkbox" | "file";
+
+/**
+ * Form field definition
+ */
 export interface FormField {
   id: string;
+  type: FormFieldType;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file';
-  required: boolean;
   placeholder?: string;
   helperText?: string;
-  validation?: FormFieldValidation;
   options?: string[];
+  validation?: FormFieldValidation;
+  required: boolean;
+  editable: boolean;
 }
 
 /**
