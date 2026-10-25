@@ -14,3 +14,4 @@ export { ApplicationRowActions } from './ApplicationRowActions';
 // Supporting components (used by main components)
 export { AcceptRejectActions } from './AcceptRejectActions';
 export { RsvpLinkDisplay } from './RsvpLinkDisplay';
+export { RegistrationEditForm } from './RegistrationEditForm';

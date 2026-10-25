@@ -119,12 +119,22 @@ export interface StatusCounts {
 /**
  * Form field definition in registration form schema
  */
+export interface FormFieldValidation {
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  maxSize?: number;
+  allowedTypes?: string[];
+}
+
 export interface FormField {
   id: string;
   label: string;
-  type: string;
+  type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file';
   required: boolean;
-  validation?: Record<string, unknown>;
+  placeholder?: string;
+  helperText?: string;
+  validation?: FormFieldValidation;
   options?: string[];
 }
 
@@ -134,6 +144,12 @@ export interface FormField {
 export interface RegistrationFormSchema {
   autoAccept?: boolean;
   fields: FormField[];
+}
+
+export interface RegistrationUpdateResponse {
+  success: boolean;
+  status: RegistrationStatus;
+  message: string;
 }
 
 /**
