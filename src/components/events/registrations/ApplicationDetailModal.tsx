@@ -6,7 +6,8 @@
  * Full-screen detail view of a registration with all form responses and files
  */
 
-import { Download } from "lucide-react";
+import Link from "next/link";
+import { Download, Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -226,6 +227,14 @@ export function ApplicationDetailModal({
         )}
 
         <DialogFooter>
+          {canEdit && registration && (
+            <Button asChild>
+              <Link href={`/registrations/${registration.id}/edit`}>
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit Their Application
+              </Link>
+            </Button>
+          )}
           {showActions && registration && (
             <AcceptRejectActions
               registrationId={registration.id}

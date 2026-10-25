@@ -251,6 +251,17 @@ export const apiClient = {
     });
   },
 
+  updateRegistrationApplication: async (
+    registrationId: string,
+    formData: Record<string, unknown>,
+    notifyApplicant: boolean
+  ) => {
+    return apiRequest(`/portal/registrations/${registrationId}/application`, {
+      method: 'PUT',
+      body: JSON.stringify({ formData, notifyApplicant }),
+    });
+  },
+
   exportRegistrations: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string }> => {
     const response = await authenticatedFetch(
       `/portal/events/${eventId}/registrations/export`, {}, { status: status, checked_in: checkedIn }
