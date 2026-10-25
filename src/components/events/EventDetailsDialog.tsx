@@ -545,7 +545,7 @@ export function EventDetailsDialog({
                     className="gap-2"
                   >
                     <FileText className="h-4 w-4" />
-                    View Applications
+                    View Registrations
                   </Button>
                 </>
               )}
