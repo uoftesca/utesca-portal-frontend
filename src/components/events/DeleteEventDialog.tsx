@@ -92,7 +92,10 @@ export function DeleteEventDialog({
           <div className="bg-muted p-4 rounded-md space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Date:</span>
-              <span className="font-medium">{formatDateTime(event.dateTime)}</span>
+              <span className="text-right font-medium">
+                {formatDateTime(event.dateTime)}
+                {event.endDateTime && ` – ${formatDateTime(event.endDateTime)}`}
+              </span>
             </div>
             {event.location && (
               <div className="flex justify-between">

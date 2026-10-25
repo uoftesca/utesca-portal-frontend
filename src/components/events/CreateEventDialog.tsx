@@ -43,6 +43,7 @@ export function CreateEventDialog() {
   const [formData, setFormData] = useState<CreateEventRequest>({
     title: '',
     dateTime: '',
+    endDateTime: '',
     description: '',
     location: '',
     registrationDeadline: '',
@@ -68,6 +69,9 @@ export function CreateEventDialog() {
     };
 
     // Add optional fields only if they have values
+    if (formData.endDateTime) {
+      cleanedData.endDateTime = convertToISO(formData.endDateTime);
+    }
     if (formData.description?.trim())
       cleanedData.description = formData.description.trim();
     if (formData.location?.trim()) cleanedData.location = formData.location.trim();
@@ -92,6 +96,7 @@ export function CreateEventDialog() {
       setFormData({
         title: '',
         dateTime: '',
+        endDateTime: '',
         description: '',
         location: '',
         registrationDeadline: '',
@@ -151,7 +156,7 @@ export function CreateEventDialog() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="dateTime">
                   Date & Time <span className="text-destructive">*</span>
@@ -171,19 +176,34 @@ export function CreateEventDialog() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="registrationDeadline">Registration Deadline</Label>
+                <Label htmlFor="endDateTime">End Date & Time</Label>
                 <Input
-                  id="registrationDeadline"
+                  id="endDateTime"
                   type="datetime-local"
-                  value={formData.registrationDeadline}
+                  value={formData.endDateTime}
                   onChange={(e) =>
-                    setFormData({ ...formData, registrationDeadline: e.target.value })
+                    setFormData({ ...formData, endDateTime: e.target.value })
                   }
                 />
                 <p className="text-xs text-muted-foreground">
                   Time in: <span className="font-medium">America/Toronto (EST/EDT)</span>
                 </p>
               </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="registrationDeadline">Registration Deadline</Label>
+              <Input
+                id="registrationDeadline"
+                type="datetime-local"
+                value={formData.registrationDeadline}
+                onChange={(e) =>
+                  setFormData({ ...formData, registrationDeadline: e.target.value })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Time in: <span className="font-medium">America/Toronto (EST/EDT)</span>
+              </p>
             </div>
 
             <div className="grid gap-2">

@@ -58,6 +58,7 @@ const cleanFormData = (formData: UpdateEventRequest): UpdateEventRequest => {
   if (formData.title?.trim()) cleanedData.title = formData.title.trim();
   if (formData.description?.trim()) cleanedData.description = formData.description.trim();
   if (formData.dateTime) cleanedData.dateTime = convertToISO(formData.dateTime);
+  if (formData.endDateTime) cleanedData.endDateTime = convertToISO(formData.endDateTime);
   if (formData.location?.trim()) cleanedData.location = formData.location.trim();
   if (formData.registrationDeadline) {
     cleanedData.registrationDeadline = convertToISO(formData.registrationDeadline);
@@ -106,6 +107,7 @@ export function EventDetailsDialog({
         title: event.title,
         description: event.description || '',
         dateTime: formatForDateTimeInput(event.dateTime),
+        endDateTime: formatForDateTimeInput(event.endDateTime),
         location: event.location || '',
         registrationDeadline: formatForDateTimeInput(event.registrationDeadline),
         status: event.status,
@@ -237,7 +239,7 @@ export function EventDetailsDialog({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-dateTime">
                     Date & Time <span className="text-destructive">*</span>
@@ -257,19 +259,34 @@ export function EventDetailsDialog({
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-registrationDeadline">Registration Deadline</Label>
+                  <Label htmlFor="edit-endDateTime">End Date & Time</Label>
                   <Input
-                    id="edit-registrationDeadline"
+                    id="edit-endDateTime"
                     type="datetime-local"
-                    value={formData.registrationDeadline || ''}
+                    value={formData.endDateTime || ''}
                     onChange={(e) =>
-                      setFormData({ ...formData, registrationDeadline: e.target.value })
+                      setFormData({ ...formData, endDateTime: e.target.value })
                     }
                   />
                   <p className="text-xs text-muted-foreground">
                     Time in: <span className="font-medium">America/Toronto (EST/EDT)</span>
                   </p>
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="edit-registrationDeadline">Registration Deadline</Label>
+                <Input
+                  id="edit-registrationDeadline"
+                  type="datetime-local"
+                  value={formData.registrationDeadline || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, registrationDeadline: e.target.value })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Time in: <span className="font-medium">America/Toronto (EST/EDT)</span>
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -401,7 +418,10 @@ export function EventDetailsDialog({
               <div className="flex items-start gap-2 text-sm">
                 <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">{formatDateTime(event.dateTime)}</p>
+                  <p className="font-medium">Starts: {formatDateTime(event.dateTime)}</p>
+                  {event.endDateTime && (
+                    <p className="font-medium">Ends: {formatDateTime(event.endDateTime)}</p>
+                  )}
                   {event.registrationDeadline && (
                     <p className="text-muted-foreground text-xs mt-1">
                       Registration closes: {formatDateTime(event.registrationDeadline)}
