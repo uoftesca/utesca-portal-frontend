@@ -128,7 +128,7 @@ export interface AttendanceCounts {
   absent: number;
 }
 
-export type FieldValidationPattern = "name" | "fullName" | "email" | "uoftEmail" | "utorid" | "phoneNumber";
+// export type FieldValidationPattern = "name" | "fullName" | "email" | "uoftEmail" | "utorid" | "phoneNumber";
 export type FieldValidationAllowedType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif";
 
 /**
@@ -137,7 +137,7 @@ export type FieldValidationAllowedType = "application/pdf" | "image/jpeg" | "ima
 export interface FormFieldValidation {
   minLength?: number;
   maxLength?: number;
-  pattern?: FieldValidationPattern;
+  pattern?: string;
   maxSize?: number;
   allowedTypes?: FieldValidationAllowedType[];
 }
