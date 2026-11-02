@@ -21,10 +21,11 @@ import { FormEditor } from '@/components/events/FormEditor';
 import { RegistrationFormSchema } from '@/types/registration';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Trash2 } from 'lucide-react';
 
 interface CreateFormDialog {
   form: RegistrationFormSchema;
-  onFormSave: (form: RegistrationFormSchema) => void;
+  onFormSave: (form?: RegistrationFormSchema) => void;
 }
 
 export function CreateFormDialog({
@@ -33,19 +34,31 @@ export function CreateFormDialog({
 }: Readonly<CreateFormDialog>) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RegistrationFormSchema>(initialForm);
-  const [changed, setChanged] = useState(false);
+  const [lastForm, setLastForm] = useState<RegistrationFormSchema | undefined>(undefined);
+
+  const handleDelete = () => {
+    setForm(initialForm);
+    setLastForm(undefined);
+    onFormSave(undefined);
+    setOpen(false);
+  }
+
+  const handleCancel = () => {
+    setForm(lastForm || initialForm);
+    setOpen(false);
+  }
 
   const handleSave = () => {
+    setLastForm(form);
     onFormSave(form);
     setOpen(false);
-    setChanged(true);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
-          {changed ? "Edit Form" : "Create Form"}
+          {lastForm ? "Edit Form" : "Create Form"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
@@ -71,20 +84,28 @@ export function CreateFormDialog({
           }} />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex flex-row justify-between items-center">
           <Button
-            type="button"
-            variant="outline"
-            onClick={() => setOpen(false)}
+            variant="destructive"
+            onClick={handleDelete}
+            className="gap-2"
           >
-            Cancel
+            <Trash2 className="h-4 w-4" />
+            Delete
           </Button>
-          <Button
-            type="submit"
-            onClick={handleSave}
-          >
-            Save
-          </Button>
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+            >
+              Save
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
