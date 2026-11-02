@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FormField, FormFieldType, FormFieldValidation } from '@/types/registration';
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
+import { FormOptionsEditor } from '@/components/events/FormOptionEditor';
 
 interface FormEditorProps {
   fields: FormField[];
@@ -33,7 +34,7 @@ interface FormEditorProps {
 
 export function FormEditor({
   fields: initialFields,
-  onFieldsChange: onFieldsChange
+  onFieldsChange: onFieldsChange,
 }: Readonly<FormEditorProps>) {
   const [fields, setFields] = useState<FormField[]>(initialFields);
   const [newField, setNewField] = useState<FormField>({
@@ -63,11 +64,15 @@ export function FormEditor({
     const newIndex = index + (dir === 'down' ? 1 : -1);
     if (newIndex < 0 || newIndex >= fields.length) return;
 
-    const newFields = [...fields];
-    const [movedField] = newFields.splice(index, 1);
-    newFields.splice(newIndex, 0, movedField);
-
-    updateFields(newFields);
+    updateFields(fields.map((field, i) => {
+      if (i === index) {
+        return fields[newIndex];
+      } else if (i === newIndex) {
+        return fields[index];
+      } else {
+        return field;
+      }
+    }));
   }
 
   const handleFieldDelete = (id: string) => {
@@ -87,10 +92,6 @@ export function FormEditor({
 
   const handleNewFieldChange = (key: keyof FormField, value: any) => {
     setNewField({ ...newField, [key]: value });
-  }
-
-  const optionsEnabled = (fieldType: FormFieldType) => {
-    return fieldType === "select" || fieldType === "radio" || fieldType === "checkbox"
   }
 
   const addNewField = () => {
@@ -126,7 +127,7 @@ export function FormEditor({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {fields.map((field) => (
+          {fields.map((field, index) => (
             <TableRow key={field.id}>
               <TableCell>
                 <Input
@@ -168,7 +169,13 @@ export function FormEditor({
                   onChange={(e) => handleFieldChange(field.id, "placeholder", e.target.value || undefined)}
                 />
               </TableCell>
-              <TableCell></TableCell>
+              <TableCell>
+                <FormOptionsEditor
+                  options={field.options || []}
+                  onOptionsChange={(newOptions) => handleFieldChange(field.id, "options", newOptions)}
+                  disabled={field.type !== "select" && field.type !== "radio" && field.type !== "checkbox"}
+                />
+              </TableCell>
               <TableCell></TableCell>
               <TableCell>
                 <Checkbox
@@ -187,13 +194,14 @@ export function FormEditor({
                   <div className="h-8 w-8 inline-flex flex-col rounded-md border border-input bg-background overflow-hidden shadow-xs">
                     <Button
                       onClick={() => handleFieldMove(field.id, "up")}
+                      disabled={index === 0}
                       className="flex h-1/2 w-full items-center justify-center rounded-none"
                     >
                       <ChevronUp className="h-3 w-3" />
                     </Button>
-                    <div className="h-px bg-border w-full" />
                     <Button
                       onClick={() => handleFieldMove(field.id, "down")}
+                      disabled={index === fields.length - 1}
                       className="flex h-1/2 w-full items-center justify-center rounded-none"
                     >
                       <ChevronDown className="h-3 w-3" />
@@ -210,7 +218,7 @@ export function FormEditor({
             </TableRow>
           ))}
 
-          <TableRow className="bg-muted/50">
+          <TableRow className="bg-secondary/20 hover:bg-secondary/40">
             <TableCell>
               <Input
                 value={newField.id}
@@ -247,7 +255,13 @@ export function FormEditor({
                 onChange={(e) => handleNewFieldChange("placeholder", e.target.value)}
               />
             </TableCell>
-            <TableCell></TableCell>
+            <TableCell>
+              <FormOptionsEditor
+                options={newField.options || []}
+                onOptionsChange={(newOptions) => handleNewFieldChange("options", newOptions)}
+                disabled={newField.type !== "select" && newField.type !== "radio" && newField.type !== "checkbox"}
+              />
+            </TableCell>
             <TableCell></TableCell>
             <TableCell>
               <Checkbox
