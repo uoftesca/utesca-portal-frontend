@@ -31,6 +31,7 @@ import {
 import { useCreateEvent } from '@/hooks/use-events';
 import type { CreateEventRequest, EventStatus } from '@/types/event';
 import { convertTorontoTimeToUTC } from '@/lib/timezone';
+import { CreateFormDialog } from '@/components/events/CreateFormDialog';
 
 // Helper to convert datetime-local to ISO 8601 string
 // The datetime-local input is interpreted as Toronto time
@@ -295,6 +296,19 @@ export function CreateEventDialog() {
               />
               <p className="text-xs text-muted-foreground">
                 Raw image URL to featured image
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="registrationForm">Registration Form</Label>
+              <CreateFormDialog
+                form={{ autoAccept: false, fields: [] }}
+                onFormSave={(newForm) =>
+                  setFormData({ ...formData, registrationFormSchema: newForm })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Internal registration form editor
               </p>
             </div>
 
