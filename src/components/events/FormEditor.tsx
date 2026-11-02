@@ -24,48 +24,54 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FormField, FormFieldType, FormFieldValidation } from '@/types/registration';
-import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 
 interface FormEditorProps {
-  initialForm: FormField[];
-  onFormChange: (newForm: FormField[]) => void;
+  fields: FormField[];
+  onFieldsChange: (newFields: FormField[]) => void;
 }
 
 export function FormEditor({
-  initialForm,
-  onFormChange
+  fields: initialFields,
+  onFieldsChange: onFieldsChange
 }: Readonly<FormEditorProps>) {
-  const [fields, setFields] = useState<FormField[]>(initialForm);
-  const [newField, setNewField] = useState<Partial<FormField>>({
+  const [fields, setFields] = useState<FormField[]>(initialFields);
+  const [newField, setNewField] = useState<FormField>({
+    id: '',
+    type: 'text',
+    label: '',
+    placeholder: '',
     required: false,
     editable: false
   });
 
+  // TODO: Enforce unique ids
+
   const updateFields = (newFields: FormField[]) => {
     setFields(newFields);
-    onFormChange(newFields);
+    onFieldsChange(newFields);
   }
 
   const handleFieldChange = (id: string, key: keyof FormField, value: any) => {
     updateFields(fields.map((field: FormField) => {
-      return field.id === id ? { ...field, [key]: value } : field;
+      return field.id === id ? { ...field, [key]: value === "" ? undefined : value } : field;
     }));
   }
 
-  const handleFieldMove = (id: string, dir: "up" | "down") => {
+  const handleFieldMove = (id: string, dir: 'up' | 'down') => {
     const index = fields.findIndex((field) => field.id == id);
-    const newIndex = index + (dir === "up" ? 1 : -1);
+    const newIndex = index + (dir === 'down' ? 1 : -1);
     if (newIndex < 0 || newIndex >= fields.length) return;
 
     const newFields = [...fields];
     const [movedField] = newFields.splice(index, 1);
-    newFields.splice(newIndex, 0, movedField)
+    newFields.splice(newIndex, 0, movedField);
 
     updateFields(newFields);
   }
 
   const handleFieldDelete = (id: string) => {
-    updateFields(fields.filter((field) => field.id === id));
+    updateFields(fields.filter((field) => field.id !== id));
   }
 
   const isNewFieldValid = () => {
@@ -83,13 +89,21 @@ export function FormEditor({
     setNewField({ ...newField, [key]: value });
   }
 
+  const optionsEnabled = (fieldType: FormFieldType) => {
+    return fieldType === "select" || fieldType === "radio" || fieldType === "checkbox"
+  }
+
   const addNewField = () => {
     if (!isNewFieldValid()) {
       return;
     }
 
-    updateFields([ ...fields, newField as FormField ]);
+    updateFields([ ...fields, newField ]);
     setNewField({
+      id: '',
+      type: 'text',
+      label: '',
+      placeholder: '',
       required: false,
       editable: false
     });
@@ -113,7 +127,7 @@ export function FormEditor({
         </TableHeader>
         <TableBody>
           {fields.map((field) => (
-            <TableRow>
+            <TableRow key={field.id}>
               <TableCell>
                 <Input
                   value={field.id}
@@ -146,13 +160,13 @@ export function FormEditor({
                 <Input
                   value={field.label}
                   onChange={(e) => handleFieldChange(field.id, "label", e.target.value)}
-                ></Input>
+                />
               </TableCell>
               <TableCell>
                 <Input
                   value={field.placeholder}
                   onChange={(e) => handleFieldChange(field.id, "placeholder", e.target.value || undefined)}
-                ></Input>
+                />
               </TableCell>
               <TableCell></TableCell>
               <TableCell></TableCell>
@@ -160,43 +174,48 @@ export function FormEditor({
                 <Checkbox
                   checked={field.required}
                   onCheckedChange={(checked) => handleFieldChange(field.id, "required", !!checked)}
-                ></Checkbox>
+                />
               </TableCell>
               <TableCell>
                 <Checkbox
                   checked={field.editable}
                   onCheckedChange={(checked) => handleFieldChange(field.id, "editable", !!checked)}
-                ></Checkbox>
+                />
               </TableCell>
               <TableCell>
-                <Button
-                  disabled={!isNewFieldValid()}
-                  onClick={() => handleFieldMove(field.id, "up")}
-                >
-                  <ArrowUp />
-                </Button>
-                <Button
-                  disabled={!isNewFieldValid()}
-                  onClick={() => handleFieldMove(field.id, "down")}
-                >
-                  <ArrowDown />
-                </Button>
-                <Button
-                  disabled={!isNewFieldValid()}
-                  onClick={() => handleFieldDelete(field.id)}
-                >
-                  <X />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <div className="h-8 w-8 inline-flex flex-col rounded-md border border-input bg-background overflow-hidden shadow-xs">
+                    <Button
+                      onClick={() => handleFieldMove(field.id, "up")}
+                      className="flex h-1/2 w-full items-center justify-center rounded-none"
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </Button>
+                    <div className="h-px bg-border w-full" />
+                    <Button
+                      onClick={() => handleFieldMove(field.id, "down")}
+                      className="flex h-1/2 w-full items-center justify-center rounded-none"
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={() => handleFieldDelete(field.id)}
+                    className="h-8 w-8"
+                  >
+                    <X />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
 
-          <TableRow className="bg-gray-50/50">
+          <TableRow className="bg-muted/50">
             <TableCell>
               <Input
                 value={newField.id}
                 onChange={(e) => handleNewFieldChange("id", e.target.value)}
-              ></Input>
+              />
             </TableCell>
             <TableCell>
               <Select
@@ -220,13 +239,13 @@ export function FormEditor({
               <Input
                 value={newField.label}
                 onChange={(e) => handleNewFieldChange("label", e.target.value)}
-              ></Input>
+              />
             </TableCell>
             <TableCell>
               <Input
                 value={newField.placeholder}
                 onChange={(e) => handleNewFieldChange("placeholder", e.target.value)}
-              ></Input>
+              />
             </TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
@@ -234,18 +253,19 @@ export function FormEditor({
               <Checkbox
                 checked={newField.required}
                 onCheckedChange={(checked) => handleNewFieldChange("required", !!checked)}
-              ></Checkbox>
+              />
             </TableCell>
             <TableCell>
               <Checkbox
                 checked={newField.editable}
                 onCheckedChange={(checked) => handleNewFieldChange("editable", !!checked)}
-              ></Checkbox>
+              />
             </TableCell>
-            <TableCell colSpan={2} className="text-right">
+            <TableCell className="text-right">
               <Button
                 disabled={!isNewFieldValid()}
                 onClick={addNewField}
+                className="w-8 h-8"
               >
                 <Plus />
               </Button>
