@@ -331,5 +331,11 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+
+  manualCheckIn: async (registrationId: string) => {
+    return apiRequest(`/portal/registrations/${registrationId}/manual-check-in`, {
+      method: 'POST',
+    });
   }
 };

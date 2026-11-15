@@ -7,7 +7,7 @@
  */
 
 import Link from "next/link";
-import { Download, Pencil } from "lucide-react";
+import { CheckCircle2, Download, Loader2, Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useRegistration } from "@/hooks/use-registrations";
+import { useManualCheckIn, useRegistration } from "@/hooks/use-registrations";
 import { AcceptRejectActions } from "./AcceptRejectActions";
 import { RsvpLinkDisplay } from "./RsvpLinkDisplay";
 import { RegistrationStatusBadge } from "./RegistrationStatusBadge";
@@ -53,11 +53,16 @@ export function ApplicationDetailModal({
   userRole,
 }: Readonly<ApplicationDetailModalProps>) {
   const { data, isLoading, error, refetch } = useRegistration(registrationId);
+  const manualCheckIn = useManualCheckIn();
 
   const registration = data?.registration;
   const canEdit = userRole === "vp" || userRole === "co_president";
   const showActions = canEdit && registration?.status === "submitted";
   const showRsvpLink = registration?.status === "accepted";
+  const canCheckIn =
+    canEdit &&
+    !registration?.checkedIn &&
+    (registration?.status === "accepted" || registration?.status === "confirmed");
 
   // Extract applicant data for confirmation dialogs
   const applicantName = registration ? extractName(registration.formData) : "";
@@ -128,6 +133,11 @@ export function ApplicationDetailModal({
                 )}
                 <RegistrationStatusBadge status={registration.status} />
               </div>
+              {registration.checkedIn && registration.checkedInAt && (
+                <p className="text-sm font-medium text-emerald-700">
+                  Checked in @ {formatInTorontoTime(registration.checkedInAt, "MMM d, yyyy h:mm a zzz")}
+                </p>
+              )}
             </div>
 
             <Separator />
@@ -227,6 +237,25 @@ export function ApplicationDetailModal({
         )}
 
         <DialogFooter>
+          {manualCheckIn.isError && (
+            <p className="mr-auto text-sm text-destructive">
+              {manualCheckIn.error.message}
+            </p>
+          )}
+          {canCheckIn && registration && (
+            <Button
+              variant="outline"
+              disabled={manualCheckIn.isPending}
+              onClick={() => manualCheckIn.mutate(registration.id)}
+            >
+              {manualCheckIn.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+              )}
+              Check In Manually
+            </Button>
+          )}
           {canEdit && registration && (
             <Button asChild>
               <Link href={`/registrations/${registration.id}/edit`}>
