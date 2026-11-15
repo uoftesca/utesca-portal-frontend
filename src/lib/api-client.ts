@@ -262,6 +262,28 @@ export const apiClient = {
     });
   },
 
+  uploadRegistrationFile: async (
+    registrationId: string,
+    data: {
+      fieldName: string;
+      fileUrl: string;
+      fileName: string;
+      fileSize: number;
+      mimeType: string;
+    }
+  ) => {
+    return apiRequest(`/portal/registrations/${registrationId}/files`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteRegistrationFile: async (registrationId: string, fileId: string) => {
+    return apiRequest(`/portal/registrations/${registrationId}/files/${fileId}`, {
+      method: 'DELETE',
+    });
+  },
+
   exportRegistrations: async (eventId: string, status?: RegistrationStatus, checkedIn?: boolean): Promise<{ blob: Blob; filename: string }> => {
     const response = await authenticatedFetch(
       `/portal/events/${eventId}/registrations/export`, {}, { status: status, checked_in: checkedIn }

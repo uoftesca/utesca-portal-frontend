@@ -57,6 +57,7 @@ export default function EditRegistrationPage() {
           eventTitle={eventQuery.data.title}
           schema={eventQuery.data.registrationFormSchema}
           initialValues={registration.formData}
+          files={registration.files}
         />
       </div>
     </main>
