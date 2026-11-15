@@ -2,9 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, CircleCheck, FileLock2, Loader2 } from "lucide-react";
+import { ArrowLeft, CircleCheck, Loader2, Trash2, Upload } from "lucide-react";
 
 import { apiClient } from "@/lib/api-client";
+import { useUploadThing } from "@/lib/uploadthing";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -29,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type {
   FormField,
+  FileMeta,
   RegistrationFormSchema,
   RegistrationUpdateResponse,
 } from "@/types/registration";
@@ -39,6 +41,7 @@ interface RegistrationEditFormProps {
   eventTitle: string;
   schema: RegistrationFormSchema;
   initialValues: Record<string, unknown>;
+  files: FileMeta[];
 }
 
 type FieldErrors = Record<string, string[]>;
@@ -76,19 +79,13 @@ function validateField(field: FormField, value: unknown): string[] {
   return errors;
 }
 
-function getFileName(value: unknown): string {
-  if (value && typeof value === "object" && "fileName" in value) {
-    return String(value.fileName);
-  }
-  return typeof value === "string" && value ? value : "No file uploaded";
-}
-
 export function RegistrationEditForm({
   registrationId,
   eventId,
   eventTitle,
   schema,
   initialValues,
+  files,
 }: Readonly<RegistrationEditFormProps>) {
   const [formValues, setFormValues] = useState<Record<string, unknown>>(() => {
     const initial: Record<string, unknown> = {};
@@ -102,11 +99,93 @@ export function RegistrationEditForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [notifyApplicant, setNotifyApplicant] = useState(false);
+  const [currentFiles, setCurrentFiles] = useState<Record<string, FileMeta>>(() =>
+    Object.fromEntries(files.filter((file) => !file.deleted).map((file) => [file.fieldName, file]))
+  );
+  const [busyFileField, setBusyFileField] = useState<string | null>(null);
+  const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
+  const { startUpload } = useUploadThing("registrationFile");
 
   const applicationsUrl = `/?event=${eventId}&view=applications`;
   const setValue = (fieldId: string, value: unknown) => {
     setFormValues((current) => ({ ...current, [fieldId]: value }));
     setFieldErrors((current) => ({ ...current, [fieldId]: [] }));
+  };
+
+  const deleteHostedFile = async (file: FileMeta) => {
+    const fileKey = file.fileUrl.split("/").pop()?.split("?")[0];
+    if (!fileKey) throw new Error("Could not determine the hosted file key.");
+
+    const response = await fetch("/api/uploadthing/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileKey }),
+    });
+    if (!response.ok) throw new Error("Failed to delete the hosted file.");
+    await apiClient.deleteRegistrationFile(registrationId, file.id);
+  };
+
+  const removeFile = async (fieldId: string) => {
+    const file = currentFiles[fieldId];
+    if (!file) return;
+
+    setBusyFileField(fieldId);
+    setFileErrors((current) => ({ ...current, [fieldId]: "" }));
+    try {
+      await deleteHostedFile(file);
+      setCurrentFiles((current) => {
+        const next = { ...current };
+        delete next[fieldId];
+        return next;
+      });
+      setValue(fieldId, "");
+    } catch (error) {
+      setFileErrors((current) => ({
+        ...current,
+        [fieldId]: error instanceof Error ? error.message : "Failed to delete file.",
+      }));
+    } finally {
+      setBusyFileField(null);
+    }
+  };
+
+  const replaceFile = async (fieldId: string, file: File) => {
+    const previousFile = currentFiles[fieldId];
+    setBusyFileField(fieldId);
+    setFileErrors((current) => ({ ...current, [fieldId]: "" }));
+
+    try {
+      const uploaded = (await startUpload([file]))?.[0];
+      if (!uploaded?.ufsUrl) throw new Error("Upload failed. Please try again.");
+
+      const attached = (await apiClient.uploadRegistrationFile(registrationId, {
+        fieldName: fieldId,
+        fileUrl: uploaded.ufsUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      })) as FileMeta;
+      setCurrentFiles((current) => ({ ...current, [fieldId]: attached }));
+      setValue(fieldId, file.name);
+
+      if (previousFile) {
+        try {
+          await deleteHostedFile(previousFile);
+        } catch {
+          setFileErrors((current) => ({
+            ...current,
+            [fieldId]: "Replacement uploaded, but the previous file could not be removed.",
+          }));
+        }
+      }
+    } catch (error) {
+      setFileErrors((current) => ({
+        ...current,
+        [fieldId]: error instanceof Error ? error.message : "Failed to upload file.",
+      }));
+    } finally {
+      setBusyFileField(null);
+    }
   };
 
   const renderField = (field: FormField): ReactNode => {
@@ -197,13 +276,59 @@ export function RegistrationEditForm({
         );
       }
       case "file":
+        const currentFile = currentFiles[field.id];
+        const fileBusy = busyFileField === field.id;
         return (
-          <div className="flex items-center gap-3 rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
-            <FileLock2 className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-medium text-foreground">{getFileName(value)}</p>
-              <p>Uploaded files cannot be changed.</p>
+          <div className="space-y-3 rounded-md border bg-muted/50 p-3 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-foreground">
+                  {currentFile?.fileName ?? "No file uploaded"}
+                </p>
+                {currentFile && (
+                  <a
+                    href={currentFile.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    View current file
+                  </a>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button asChild type="button" variant="outline" size="sm" disabled={fileBusy}>
+                  <label className="cursor-pointer">
+                    {fileBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {currentFile ? "Replace" : "Upload"}
+                    <input
+                      type="file"
+                      className="sr-only"
+                      accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"
+                      disabled={fileBusy}
+                      onChange={(event) => {
+                        const selected = event.target.files?.[0];
+                        if (selected) void replaceFile(field.id, selected);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Button>
+                {currentFile && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    disabled={fileBusy}
+                    onClick={() => void removeFile(field.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
+            {fileErrors[field.id] && <p className="text-destructive">{fileErrors[field.id]}</p>}
           </div>
         );
       default:
@@ -224,7 +349,9 @@ export function RegistrationEditForm({
 
     const errors: FieldErrors = {};
     schema.fields.forEach((field) => {
-      const messages = validateField(field, formValues[field.id]);
+      const messages = field.type === "file" && field.required && !currentFiles[field.id]
+        ? ["This file is required."]
+        : validateField(field, formValues[field.id]);
       if (messages.length) errors[field.id] = messages;
     });
     setFieldErrors(errors);
@@ -232,9 +359,9 @@ export function RegistrationEditForm({
 
     const formData = { ...initialValues };
     schema.fields.forEach((field) => {
-      if (field.type !== "file") {
-        formData[field.id] = formValues[field.id];
-      }
+      formData[field.id] = field.type === "file"
+        ? currentFiles[field.id]?.fileName ?? ""
+        : formValues[field.id];
     });
 
     setSubmitting(true);

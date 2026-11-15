@@ -270,3 +270,20 @@ export function useCheckIn() {
     }
   });
 }
+
+export function useManualCheckIn() {
+  const queryClient = useQueryClient();
+
+  return useMutation<CheckInResponse, Error, string>({
+    mutationFn: async (registrationId) => {
+      const response = await apiClient.manualCheckIn(registrationId);
+      return response as CheckInResponse;
+    },
+    onSuccess: (_response, registrationId) => {
+      queryClient.invalidateQueries({
+        queryKey: registrationKeys.detail(registrationId),
+      });
+      queryClient.invalidateQueries({ queryKey: registrationKeys.lists() });
+    },
+  });
+}
