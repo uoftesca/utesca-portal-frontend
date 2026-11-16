@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormField, FormFieldType } from '@/types/registration';
 import { FormOptionsEditor } from '@/components/events/FormOptionEditor';
+import { FormValidationEditor } from './FormValidationEditor';
 
 interface FormFieldEditorProps {
   field: FormField;
@@ -22,6 +23,7 @@ export function FormFieldEditor({
 }: Readonly<FormFieldEditorProps>) {
   const isPlaceholderType = field.type === 'text' || field.type === 'textarea';
   const isOptionType = field.type === 'select' || field.type === 'radio' || field.type === 'checkbox';
+  const isValidationType = field.type === 'text' || field.type === 'textarea' || field.type === 'file';
 
   return (
     <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -60,7 +62,7 @@ export function FormFieldEditor({
           <Input
             value={field.placeholder ?? ''}
             onChange={(e) => onFieldChange('placeholder', e.target.value || undefined)}
-            placeholder="Optional placeholder..."
+            placeholder="Optional Placeholder"
           />
         </div>
       )}
@@ -71,6 +73,17 @@ export function FormFieldEditor({
           <FormOptionsEditor
             options={field.options || []}
             onOptionsChange={(newOptions) => onFieldChange('options', newOptions)}
+          />
+        </div>
+      )}
+
+      {isValidationType && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground">Validation</Label>
+          <FormValidationEditor
+            fieldType={field.type}
+            validation={field.validation || {}}
+            onValidationChange={(newValidation) => onFieldChange('validation', newValidation)}
           />
         </div>
       )}
