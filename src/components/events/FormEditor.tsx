@@ -148,10 +148,18 @@ export function FormEditor({
                 </Button>
               </div>
 
-              <FormFieldEditor
-                field={field}
-                onFieldChange={(key, value) => handleFieldChange(field.id, key, value)}
-              />
+              <div className="flex-1 w-full space-y-3">
+                <div className="flex items-center justify-start mb-4">
+                  <div className="font-mono text-[11px] text-muted-foreground/80 bg-muted/60 border border-border/40 px-2 py-0.5 rounded-md">
+                    ID: <span className="font-semibold text-foreground/80">{field.id}</span>
+                  </div>
+                </div>
+
+                <FormFieldEditor
+                  field={field}
+                  onFieldChange={(key, value) => handleFieldChange(field.id, key, value)}
+                />
+              </div>
 
               <div className="flex items-center justify-end md:pt-1">
                 <Button
