@@ -49,7 +49,6 @@ export function useDefaultRegistrationForm() {
     queryKey: eventKeys.defaultRegistrationForm(),
     queryFn: async () => {
       const response = await apiClient.getDefaultRegistrationForm();
-      console.log(response);
       return response as RegistrationFormSchema;
     }
   })
