@@ -30,7 +30,7 @@ export function FormFieldEditor({
       <div className="space-y-1.5">
         <Label className="text-xs font-semibold text-muted-foreground">Label</Label>
         <Input
-          value={field.label}
+          value={field.label ?? ''}
           onChange={(e) => onFieldChange('label', e.target.value)}
           placeholder="Field Label"
         />
