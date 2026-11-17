@@ -20,13 +20,18 @@ interface FormValidationEditorProps {
 
 const COMMON_PATTERNS: { label: string, value: string }[] = [
   { label: 'None', value: 'none' },
+  { label: 'Name', value: "^[p{L}p{M}]+(?:[' -][p{L}p{M}]+)*$" },
+  { label: 'Full Name', value: "^[p{L}p{M}]+(?:[' -][p{L}p{M}]+)*(?:s+[p{L}p{M}]+(?:[' -][p{L}p{M}]+)*)+$" },
   { label: 'UTORid', value: '^[a-z0-9]{7,8}$' },
   { label: 'Email Address', value: '^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$' },
   { label: 'U of T Email Address', value: '^[\\w-\\.]+@mail\.utoronto\.ca$/' },
   { label: 'Phone Number', value: '^\\+?[1-9][0-9\\s.-]{1,18}$' },
   { label: 'URL / Website', value: '^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$' },
   { label: 'Alphanumeric Only', value: '^[a-zA-Z0-9]+$' },
+  { label: 'Custom Regex', value: 'custom' },
 ];
+
+const DEFAULT_CUSTOM_REGEX = '^.*$';
 
 const ALLOWED_FILE_TYPES: { label: string, value: FieldValidationAllowedType }[] = [
   { label: 'PDF Document (application/pdf)', value: 'application/pdf' },
@@ -46,8 +51,11 @@ export function FormValidationEditor({
   const isFileField = fieldType === 'file';
 
   const handleChange = (key: keyof FormFieldValidation, value: any) => {
-    onValidationChange({ ...validation, [key]: value === '' ? undefined : value });
+    onValidationChange({ ...validation, [key]: value });
   };
+
+  const isCommonPattern = COMMON_PATTERNS.some((p) => p.value === validation.pattern);
+  const patternSelectVal = validation.pattern === undefined ? 'none' : isCommonPattern ? validation.pattern : 'custom';
 
   let selectedTypes = validation.allowedTypes ?? [];
 
@@ -61,7 +69,7 @@ export function FormValidationEditor({
     handleChange('allowedTypes', selectedTypes.length > 0 ? selectedTypes : undefined);
   };
 
-  const activeRulesCount = Object.values(validation).filter((value) => value !== undefined).length;
+  const activeRulesCount = Object.values(validation).filter((value) => !!value).length;
 
   return (
     <Popover>
@@ -111,8 +119,10 @@ export function FormValidationEditor({
             <div className="space-y-1">
               <Label className="text-[11px]">Format Pattern</Label>
               <Select
-                value={validation.pattern ?? 'none'}
-                onValueChange={(value) => handleChange('pattern', value === 'none' ? '' : value)}
+                value={patternSelectVal}
+                onValueChange={(value) =>
+                  handleChange('pattern', value === 'none' ? undefined : value === 'custom' ? DEFAULT_CUSTOM_REGEX : value)
+                }
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="None" />
@@ -126,6 +136,19 @@ export function FormValidationEditor({
                 </SelectContent>
               </Select>
             </div>
+
+            {patternSelectVal === 'custom' && (
+              <div className="space-y-1">
+                <Label className="text-[11px]">Custom Regex Pattern</Label>
+                <Input
+                  type="text"
+                  className="h-8 text-xs font-mono"
+                  value={validation.pattern ?? ''}
+                  onChange={(e) => handleChange('pattern', e.target.value)}
+                  placeholder="e.g. ^[A-Z]{3}-\d{4}$"
+                />
+              </div>
+            )}
           </div>
         )}
 
