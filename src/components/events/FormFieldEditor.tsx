@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormField, FormFieldType } from '@/types/registration';
-import { FormOptionsEditor } from '@/components/events/FormOptionEditor';
+import { FormOptionsEditor } from './FormOptionsEditor';
 import { FormValidationEditor } from './FormValidationEditor';
 
 interface FormFieldEditorProps {
