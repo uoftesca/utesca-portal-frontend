@@ -13,6 +13,7 @@ import type {
   UpdateEventRequest,
   GetEventsParams,
 } from '@/types/event';
+import { RegistrationFormSchema } from '@/types/registration';
 
 /**
  * Query key factory for events
@@ -24,6 +25,7 @@ export const eventKeys = {
     [...eventKeys.lists(), filters] as const,
   details: () => [...eventKeys.all, 'detail'] as const,
   detail: (id: string) => [...eventKeys.details(), id] as const,
+  defaultRegistrationForm: () => [...eventKeys.all, 'default-registration-form'] as const,
 };
 
 /**
@@ -37,6 +39,20 @@ export function useEvents(params?: GetEventsParams) {
       return response as EventListResponse;
     },
   });
+}
+
+/**
+ * Hook to fetch the default event registration form
+ */
+export function useDefaultRegistrationForm() {
+  return useQuery<RegistrationFormSchema, Error>({
+    queryKey: eventKeys.defaultRegistrationForm(),
+    queryFn: async () => {
+      const response = await apiClient.getDefaultRegistrationForm();
+      console.log(response);
+      return response as RegistrationFormSchema;
+    }
+  })
 }
 
 /**
