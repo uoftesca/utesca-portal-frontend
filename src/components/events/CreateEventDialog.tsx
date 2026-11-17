@@ -31,7 +31,7 @@ import {
 import { useCreateEvent } from '@/hooks/use-events';
 import type { CreateEventRequest, EventStatus } from '@/types/event';
 import { convertTorontoTimeToUTC } from '@/lib/timezone';
-import { CreateFormDialog } from '@/components/events/CreateFormDialog';
+import { RegistrationFormDialog } from '@/components/events/RegistrationFormDialog';
 
 // Helper to convert datetime-local to ISO 8601 string
 // The datetime-local input is interpreted as Toronto time
@@ -301,8 +301,7 @@ export function CreateEventDialog() {
 
             <div className="grid gap-2">
               <Label htmlFor="registrationForm">Registration Form</Label>
-              <CreateFormDialog
-                form={{ autoAccept: false, fields: [] }}
+              <RegistrationFormDialog
                 onFormSave={(newForm) =>
                   setFormData({ ...formData, registrationFormSchema: newForm })
                 }
