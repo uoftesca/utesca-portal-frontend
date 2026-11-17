@@ -23,28 +23,30 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
 
+const DEFAULT_FORM: RegistrationFormSchema = { autoAccept: false, fields: [] }
+
 interface CreateFormDialog {
-  form: RegistrationFormSchema;
+  form?: RegistrationFormSchema;
   onFormSave: (form?: RegistrationFormSchema) => void;
 }
 
-export function CreateFormDialog({
+export function RegistrationFormDialog({
   form: initialForm,
   onFormSave: onFormSave
 }: Readonly<CreateFormDialog>) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<RegistrationFormSchema>(initialForm);
-  const [lastForm, setLastForm] = useState<RegistrationFormSchema | undefined>(undefined);
+  const [form, setForm] = useState<RegistrationFormSchema>(initialForm ?? DEFAULT_FORM);
+  const [lastForm, setLastForm] = useState<RegistrationFormSchema | undefined>(initialForm);
 
   const handleDelete = () => {
-    setForm(initialForm);
+    setForm(DEFAULT_FORM);
     setLastForm(undefined);
     onFormSave(undefined);
     setOpen(false);
   }
 
   const handleCancel = () => {
-    setForm(lastForm || initialForm);
+    setForm(lastForm || DEFAULT_FORM);
     setOpen(false);
   }
 
