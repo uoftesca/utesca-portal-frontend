@@ -6,7 +6,7 @@
  * Dialog to save forms for event creation and editing
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,13 +22,14 @@ import { RegistrationFormSchema } from '@/types/registration';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
-
-const DEFAULT_FORM: RegistrationFormSchema = { autoAccept: false, fields: [] }
+import { useDefaultRegistrationForm } from '@/hooks/use-events';
 
 interface CreateFormDialog {
   form?: RegistrationFormSchema;
   onFormSave: (form?: RegistrationFormSchema) => void;
 }
+
+const DEFAULT_FORM: RegistrationFormSchema = { autoAccept: false, fields: [] };
 
 export function RegistrationFormDialog({
   form: initialForm,
@@ -37,6 +38,16 @@ export function RegistrationFormDialog({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RegistrationFormSchema>(initialForm ?? DEFAULT_FORM);
   const [lastForm, setLastForm] = useState<RegistrationFormSchema | undefined>(initialForm);
+
+  const {
+    data: defaultRegistrationForm,
+  } = useDefaultRegistrationForm();
+
+  useEffect(() => {
+    if (initialForm === undefined && lastForm === undefined && defaultRegistrationForm) {
+      setForm(defaultRegistrationForm);
+    }
+  })
 
   const handleDelete = () => {
     setForm(DEFAULT_FORM);
@@ -65,13 +76,13 @@ export function RegistrationFormDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Form</DialogTitle>
+          <DialogTitle>{lastForm ? "Edit Form" : "Create New Form"}</DialogTitle>
           <DialogDescription>
-            Create a new form for this event. Fill in the form details below.
+            {`${lastForm ? "Edit the" : "Create a new"} form for this event. Add or edit fields below.`}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 py-2">
+        <div className="flex flex-col gap-6 py-2">
           <div className="grid gap-2">
             <Label htmlFor="registrationDeadline">Auto Accept</Label>
             <Checkbox
