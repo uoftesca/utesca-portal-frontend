@@ -128,8 +128,7 @@ export interface AttendanceCounts {
   absent: number;
 }
 
-// export type FieldValidationPattern = "name" | "fullName" | "email" | "uoftEmail" | "utorid" | "phoneNumber";
-export type FieldValidationAllowedType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif";
+export type FieldValidationAllowedType = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic' | 'image/heif';
 
 /**
  * Form field validation schema structure
@@ -142,7 +141,7 @@ export interface FormFieldValidation {
   allowedTypes?: FieldValidationAllowedType[];
 }
 
-export type FormFieldType = "text" | "textarea" | "select" | "radio" | "checkbox" | "file";
+export type FormFieldType = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file';
 
 /**
  * Form field definition
