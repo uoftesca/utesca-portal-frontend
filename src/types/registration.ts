@@ -149,7 +149,7 @@ export type FormFieldType = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox
 export interface FormField {
   id: string;
   type: FormFieldType;
-  label: string;
+  label?: string;
   placeholder?: string;
   helperText?: string;
   options?: string[];
