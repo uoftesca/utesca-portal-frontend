@@ -8,21 +8,21 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FormField } from '@/types/registration';
+import { FormFieldSchema } from '@/types/form';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { FormFieldEditor } from './FormFieldEditor';
 
 interface FormEditorProps {
-  fields: FormField[];
-  onFieldsChange: (newFields: FormField[]) => void;
+  fields: FormFieldSchema[];
+  onFieldsChange: (newFields: FormFieldSchema[]) => void;
 }
 
 export function FormEditor({
   fields: initialFields,
   onFieldsChange,
 }: Readonly<FormEditorProps>) {
-  const [fields, setFields] = useState<FormField[]>(initialFields);
-  const [newField, setNewField] = useState<FormField>({
+  const [fields, setFields] = useState<FormFieldSchema[]>(initialFields);
+  const [newField, setNewField] = useState<FormFieldSchema>({
     id: '',
     type: 'text',
     label: '',
@@ -31,14 +31,14 @@ export function FormEditor({
     editable: false,
   });
 
-  const updateFields = (newFields: FormField[]) => {
+  const updateFields = (newFields: FormFieldSchema[]) => {
     setFields(newFields);
     onFieldsChange(newFields);
   };
 
-  const handleFieldChange = (id: string, key: keyof FormField, value: any) => {
+  const handleFieldChange = (id: string, key: keyof FormFieldSchema, value: any) => {
     updateFields(
-      fields.map((field: FormField) => {
+      fields.map((field: FormFieldSchema) => {
         if (field.id === id) {
           return { ...field, [key]: value === '' ? undefined : value };
         } else {
@@ -77,7 +77,7 @@ export function FormEditor({
     );
   };
 
-  const handleNewFieldChange = (key: keyof FormField, value: any) => {
+  const handleNewFieldChange = (key: keyof FormFieldSchema, value: any) => {
     setNewField({ ...newField, [key]: value });
   };
 

@@ -12,13 +12,13 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FormFieldType, FormFieldValidation, FieldValidationAllowedType } from '@/types/registration';
+import { FormFieldType, FieldValidationSchema, AllowedFileType } from '@/types/form';
 import { SlidersHorizontal } from 'lucide-react';
 
 interface FormValidationEditorProps {
   fieldType: FormFieldType;
-  validation: FormFieldValidation;
-  onValidationChange: (newValidation: FormFieldValidation) => void;
+  validation: FieldValidationSchema;
+  onValidationChange: (newValidation: FieldValidationSchema) => void;
 }
 
 const COMMON_PATTERNS: { label: string, value: string }[] = [
@@ -36,7 +36,7 @@ const COMMON_PATTERNS: { label: string, value: string }[] = [
 
 const DEFAULT_CUSTOM_REGEX = '^.*$';
 
-const ALLOWED_FILE_TYPES: { label: string, value: FieldValidationAllowedType }[] = [
+const ALLOWED_FILE_TYPES: { label: string, value: AllowedFileType }[] = [
   { label: 'PDF Document (application/pdf)', value: 'application/pdf' },
   { label: 'JPEG Image (image/jpeg)', value: 'image/jpeg' },
   { label: 'PNG Image (image/png)', value: 'image/png' },
@@ -53,7 +53,7 @@ export function FormValidationEditor({
   const isTextField = fieldType === 'text' || fieldType === 'textarea';
   const isFileField = fieldType === 'file';
 
-  const handleChange = (key: keyof FormFieldValidation, value: any) => {
+  const handleChange = (key: keyof FieldValidationSchema, value: any) => {
     onValidationChange({ ...validation, [key]: value });
   };
 
@@ -62,7 +62,7 @@ export function FormValidationEditor({
 
   let selectedTypes = validation.allowedTypes ?? [];
 
-  const handleAllowedTypeToggle = (type: FieldValidationAllowedType, checked: boolean) => {
+  const handleAllowedTypeToggle = (type: AllowedFileType, checked: boolean) => {
     if (checked) {
       if (!selectedTypes.includes(type)) selectedTypes = [...selectedTypes, type];
     } else {

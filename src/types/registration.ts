@@ -5,6 +5,8 @@
  * from domains/events/registrations/models.py
  */
 
+import { FormFieldSchema } from "./form";
+
 export type RegistrationStatus = 'submitted' | 'accepted' | 'rejected' | 'confirmed' | 'not_attending' | 'waitlist' |
   'withdrawn' | 'pending_verification';
 
@@ -128,42 +130,13 @@ export interface AttendanceCounts {
   absent: number;
 }
 
-export type FieldValidationAllowedType = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic' | 'image/heif';
-
-/**
- * Form field validation schema structure
- */
-export interface FormFieldValidation {
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  maxSize?: number;
-  allowedTypes?: FieldValidationAllowedType[];
-}
-
-export type FormFieldType = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file';
-
-/**
- * Form field definition
- */
-export interface FormField {
-  id: string;
-  type: FormFieldType;
-  label?: string;
-  placeholder?: string;
-  helperText?: string;
-  options?: string[];
-  validation?: FormFieldValidation;
-  required: boolean;
-  editable: boolean;
-}
 
 /**
  * Registration form schema structure stored in events table
  */
 export interface RegistrationFormSchema {
   autoAccept?: boolean;
-  fields: FormField[];
+  fields: FormFieldSchema[];
 }
 
 export interface RegistrationUpdateResponse {

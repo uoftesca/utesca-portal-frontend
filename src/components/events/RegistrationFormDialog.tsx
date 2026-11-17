@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FormEditor } from '@/components/events/FormEditor';
+import { FormEditor } from '@/components/forms/FormEditor';
 import { RegistrationFormSchema } from '@/types/registration';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
