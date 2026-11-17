@@ -1,7 +1,10 @@
 /**
  * FormValidationEditor Component
- * Edits field validation rules inside a compact Popover
+ *
+ * Popover for editing a field's validation rules
  */
+
+'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

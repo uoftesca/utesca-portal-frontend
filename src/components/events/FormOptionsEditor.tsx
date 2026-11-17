@@ -1,3 +1,9 @@
+/**
+ * FormOptionsEditor Component
+ *
+ * Popover for editing a form field's options
+ */
+
 'use client';
 
 import { useState } from 'react';

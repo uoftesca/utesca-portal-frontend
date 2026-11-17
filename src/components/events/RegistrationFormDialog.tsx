@@ -1,10 +1,10 @@
-'use client';
-
 /**
  * Create Form Dialog Component
  *
  * Dialog to save forms for event creation and editing
  */
+
+'use client';
 
 import { useEffect, useState } from 'react';
 import {
