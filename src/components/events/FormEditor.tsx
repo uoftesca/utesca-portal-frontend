@@ -4,6 +4,8 @@
  * Component for editing registration/feedback forms
  */
 
+'use client';
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/types/registration';
