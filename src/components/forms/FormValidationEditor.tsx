@@ -58,7 +58,7 @@ export function FormValidationEditor({
   };
 
   const isCommonPattern = COMMON_PATTERNS.some((p) => p.value === validation.pattern);
-  const patternSelectVal = validation.pattern === undefined ? 'none' : isCommonPattern ? validation.pattern : 'custom';
+  const patternSelectVal = validation.pattern == null ? 'none' : isCommonPattern ? validation.pattern : 'custom';
 
   let selectedTypes = validation.allowedTypes ?? [];
 
@@ -72,7 +72,7 @@ export function FormValidationEditor({
     handleChange('allowedTypes', selectedTypes.length > 0 ? selectedTypes : undefined);
   };
 
-  const activeRulesCount = Object.values(validation).filter((value) => !!value).length;
+  const activeRulesCount = Object.values(validation).filter((value) => value !== null).length;
 
   return (
     <Popover>

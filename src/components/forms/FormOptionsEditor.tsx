@@ -35,15 +35,11 @@ export function FormOptionsEditor({
     const newIndex = index + (dir === 'down' ? 1 : -1);
     if (newIndex < 0 || newIndex >= options.length) return;
 
-    onChange(options.map((option, i) => {
-      if (i === index) {
-        return options[newIndex];
-      } else if (i === newIndex) {
-        return options[index];
-      } else {
-        return option;
-      }
-    }));
+    const nextOptions = [...options];
+    const [movedOption] = nextOptions.splice(index, 1);
+    nextOptions.splice(newIndex, 0, movedOption);
+
+    onChange(nextOptions);
   }
 
   const handleOptionRemove = (index: number) => {

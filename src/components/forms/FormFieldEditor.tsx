@@ -10,13 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormField, FormFieldType } from '@/types/registration';
+import { FormFieldSchema, FormFieldType } from '@/types/form';
 import { FormOptionsEditor } from './FormOptionsEditor';
 import { FormValidationEditor } from './FormValidationEditor';
 
 interface FormFieldEditorProps {
-  field: FormField;
-  onFieldChange: (key: keyof FormField, value: any) => void;
+  field: FormFieldSchema;
+  onFieldChange: (key: keyof FormFieldSchema, value: any) => void;
 }
 
 export function FormFieldEditor({
