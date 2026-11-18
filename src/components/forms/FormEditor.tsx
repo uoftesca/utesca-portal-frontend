@@ -12,6 +12,41 @@ import { FormFieldSchema } from '@/types/form';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { FormFieldEditor } from './FormFieldEditor';
 
+const DEFAULT_NEW_FIELD: FormFieldSchema = {
+  id: '',
+  type: 'text',
+  label: '',
+  placeholder: '',
+  required: false,
+  editable: false,
+}
+
+const cleanUpField = (field: FormFieldSchema) => {
+  const cleaned = { ...field };
+
+  if (cleaned.type === 'select' || cleaned.type === 'checkbox' || cleaned.type === 'radio') {
+    delete cleaned.placeholder;
+    delete cleaned.validation;
+
+  } else {
+    if (cleaned.type === 'file') delete cleaned.placeholder;
+    delete cleaned.options;
+
+    if (cleaned.validation) {
+      const allowedKeys = cleaned.type === 'file' ? ['maxSize', 'allowedTypes'] :
+        ['minLength', 'maxLength', 'pattern'];
+
+      const entries = Object.entries(cleaned.validation)
+        .filter(([key, value]) => allowedKeys.includes(key) && value !== null);
+
+      if (entries.length === 0) delete cleaned.validation;
+      else cleaned.validation = Object.fromEntries(entries);
+    }
+  }
+
+  return cleaned;
+}
+
 interface FormEditorProps {
   fields: FormFieldSchema[];
   onFieldsChange: (newFields: FormFieldSchema[]) => void;
@@ -22,14 +57,7 @@ export function FormEditor({
   onFieldsChange,
 }: Readonly<FormEditorProps>) {
   const [fields, setFields] = useState<FormFieldSchema[]>(initialFields);
-  const [newField, setNewField] = useState<FormFieldSchema>({
-    id: '',
-    type: 'text',
-    label: '',
-    placeholder: '',
-    required: false,
-    editable: false,
-  });
+  const [newField, setNewField] = useState<FormFieldSchema>(DEFAULT_NEW_FIELD);
 
   const updateFields = (newFields: FormFieldSchema[]) => {
     setFields(newFields);
@@ -40,10 +68,10 @@ export function FormEditor({
     updateFields(
       fields.map((field: FormFieldSchema) => {
         if (field.id === id) {
-          return { ...field, [key]: value === '' ? undefined : value };
-        } else {
-          return field;
+          return cleanUpField({ ...field, [key]: value === '' ? undefined : value });
         }
+
+        return field;
       })
     );
   };
@@ -53,36 +81,28 @@ export function FormEditor({
     const newIndex = index + (dir === 'down' ? 1 : -1);
     if (newIndex < 0 || newIndex >= fields.length) return;
 
-    updateFields(fields.map((field, i) => {
-      if (i === index) {
-        return fields[newIndex];
-      } else if (i === newIndex) {
-        return fields[index];
-      } else {
-        return field;
-      }
-    }));
+    const nextFields = [...fields];
+    const [movedItem] = nextFields.splice(index, 1);
+    nextFields.splice(newIndex, 0, movedItem);
+
+    updateFields(nextFields);
   };
 
   const handleFieldDelete = (id: string) => {
     updateFields(fields.filter((field) => field.id !== id));
   };
 
-  const isNewFieldValid = () => {
-    return (
-      newField.label &&
-      newField.type &&
-      newField.required !== undefined &&
-      newField.editable !== undefined
-    );
-  };
+  const isNewFieldValid = newField.label?.trim() &&
+    newField.type &&
+    newField.required !== null &&
+    newField.editable !== null;
 
   const handleNewFieldChange = (key: keyof FormFieldSchema, value: any) => {
-    setNewField({ ...newField, [key]: value });
+    setNewField((prev) => ({ ...prev, [key]: value }));
   };
 
   const getNewFieldId = () => {
-    const initialId = newField.label.trim().toLowerCase()
+    const initialId = (newField.label ?? '').trim().toLowerCase()
       .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '_');
 
     let newId = initialId;
@@ -90,26 +110,21 @@ export function FormEditor({
 
     while (fields.some((field) => field.id === newId)) {
       count++;
-      newId = initialId + "_" + count;
+      newId = initialId ? initialId + "_" + count : count.toString();
     }
 
     return newId;
-  }
+  };
 
   const addNewField = () => {
-    if (!isNewFieldValid()) return;
+    if (!isNewFieldValid) return;
 
-    newField.id = getNewFieldId();
+    updateFields([
+      ...fields,
+      cleanUpField({ ...newField, id: getNewFieldId() })
+    ]);
 
-    updateFields([...fields, newField]);
-    setNewField({
-      id: '',
-      type: 'text',
-      label: '',
-      placeholder: '',
-      required: false,
-      editable: false,
-    });
+    setNewField(DEFAULT_NEW_FIELD);
   };
 
   return (
@@ -189,7 +204,7 @@ export function FormEditor({
         <div className="flex justify-end pt-2">
           <Button
             type="button"
-            disabled={!isNewFieldValid()}
+            disabled={!isNewFieldValid}
             onClick={addNewField}
           >
             <Plus className="mr-2 h-4 w-4" /> Add Field
