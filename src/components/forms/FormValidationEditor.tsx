@@ -53,7 +53,7 @@ export function FormValidationEditor({
   const isTextField = fieldType === 'text' || fieldType === 'textarea';
   const isFileField = fieldType === 'file';
 
-  const handleChange = (key: keyof FieldValidationSchema, value: any) => {
+  const handleChange = (key: keyof FieldValidationSchema, value: FieldValidationSchema[keyof FieldValidationSchema]) => {
     onValidationChange({ ...validation, [key]: value });
   };
 

@@ -16,7 +16,7 @@ import { FormValidationEditor } from './FormValidationEditor';
 
 interface FormFieldEditorProps {
   field: FormFieldSchema;
-  onFieldChange: (key: keyof FormFieldSchema, value: any) => void;
+  onFieldChange: (key: keyof FormFieldSchema, value: FormFieldSchema[keyof FormFieldSchema]) => void;
 }
 
 export function FormFieldEditor({
