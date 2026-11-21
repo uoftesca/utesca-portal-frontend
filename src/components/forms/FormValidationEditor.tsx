@@ -77,7 +77,7 @@ export function FormValidationEditor({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+        <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs">
           <SlidersHorizontal className="h-3.5 w-3.5" />
           {activeRulesCount > 0 ? `${activeRulesCount} rule${activeRulesCount > 1 ? 's' : ''} set` : 'No rules set'}
         </Button>
