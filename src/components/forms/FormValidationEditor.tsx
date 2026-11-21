@@ -72,7 +72,7 @@ export function FormValidationEditor({
     handleChange('allowedTypes', selectedTypes.length > 0 ? selectedTypes : undefined);
   };
 
-  const activeRulesCount = Object.values(validation).filter((value) => value !== null).length;
+  const activeRulesCount = Object.values(validation).filter((value) => value != null).length;
 
   return (
     <Popover>

@@ -98,7 +98,7 @@ export function FormEditor({
     newField.editable !== null;
 
   const handleNewFieldChange = (key: keyof FormFieldSchema, value: FormFieldSchema[keyof FormFieldSchema]) => {
-    setNewField((prev) => ({ ...prev, [key]: value }));
+    setNewField(cleanUpField({ ...newField, [key]: value }));
   };
 
   const getNewFieldId = () => {
