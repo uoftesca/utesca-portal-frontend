@@ -195,13 +195,13 @@ export function FormEditor({
         )}
       </div>
 
-      <div className="rounded-xl border border-dashed bg-muted/40 p-5 space-y-4">
+      <div className="rounded-xl border border-dashed bg-muted/40 p-5 space-y-2">
         <FormFieldEditor
           field={newField}
           onFieldChange={handleNewFieldChange}
         />
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end">
           <Button
             type="button"
             disabled={!isNewFieldValid}
