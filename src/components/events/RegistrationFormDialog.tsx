@@ -44,10 +44,10 @@ export function RegistrationFormDialog({
   } = useDefaultRegistrationForm();
 
   useEffect(() => {
-    if (initialForm === undefined && lastForm === undefined && defaultRegistrationForm) {
+    if (!initialForm && !lastForm && defaultRegistrationForm) {
       setForm(defaultRegistrationForm);
     }
-  })
+  }, [initialForm, lastForm, defaultRegistrationForm])
 
   const handleDelete = () => {
     setForm(DEFAULT_FORM);
