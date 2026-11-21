@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormFieldSchema, FormFieldType } from '@/types/form';
+import type { FormFieldSchema, FormFieldType } from '@/types/form';
 import { FormOptionsEditor } from './FormOptionsEditor';
 import { FormValidationEditor } from './FormValidationEditor';
 

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FormFieldType, FieldValidationSchema, AllowedFileType } from '@/types/form';
+import type { FormFieldType, FieldValidationSchema, AllowedFileType } from '@/types/form';
 import { SlidersHorizontal } from 'lucide-react';
 
 interface FormValidationEditorProps {

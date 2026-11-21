@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FormFieldSchema } from '@/types/form';
+import type { FormFieldSchema } from '@/types/form';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { FormFieldEditor } from './FormFieldEditor';
 
