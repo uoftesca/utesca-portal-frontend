@@ -44,20 +44,28 @@ export function RegistrationFormDialog({
   } = useDefaultRegistrationForm();
 
   useEffect(() => {
-    if (!initialForm && !lastForm && defaultRegistrationForm) {
+    if (!open && !lastForm && defaultRegistrationForm) {
       setForm(defaultRegistrationForm);
     }
-  }, [initialForm, lastForm, defaultRegistrationForm])
+  }, [open, lastForm, defaultRegistrationForm])
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setForm(lastForm ?? defaultRegistrationForm ?? DEFAULT_FORM);
+    }
+
+    setOpen(nextOpen);
+  }
 
   const handleDelete = () => {
-    setForm(DEFAULT_FORM);
+    setForm(defaultRegistrationForm ?? DEFAULT_FORM);
     setLastForm(undefined);
     onFormSave(undefined);
     setOpen(false);
   }
 
   const handleCancel = () => {
-    setForm(lastForm || DEFAULT_FORM);
+    setForm(lastForm ?? defaultRegistrationForm ?? DEFAULT_FORM);
     setOpen(false);
   }
 
@@ -68,7 +76,7 @@ export function RegistrationFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="gap-2">
           {lastForm ? "Edit Form" : "Create Form"}
@@ -84,9 +92,9 @@ export function RegistrationFormDialog({
 
         <div className="flex flex-col gap-6 py-2">
           <div className="grid gap-2">
-            <Label htmlFor="registrationDeadline">Auto Accept</Label>
+            <Label htmlFor="autoAccept">Auto Accept</Label>
             <Checkbox
-              id="registrationDeadline"
+              id="autoAccept"
               checked={form.autoAccept}
               onCheckedChange={(checked) => setForm({ ...form, autoAccept: !!checked })}
             />
