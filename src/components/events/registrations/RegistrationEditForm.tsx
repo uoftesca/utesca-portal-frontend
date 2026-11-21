@@ -29,11 +29,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type {
-  FormField,
   FileMeta,
   RegistrationFormSchema,
   RegistrationUpdateResponse,
 } from "@/types/registration";
+import type {
+  FormFieldSchema
+} from "@/types/form"
 
 interface RegistrationEditFormProps {
   registrationId: string;
@@ -46,11 +48,11 @@ interface RegistrationEditFormProps {
 
 type FieldErrors = Record<string, string[]>;
 
-function getDefaultValue(field: FormField) {
+function getDefaultValue(field: FormFieldSchema) {
   return field.type === "checkbox" ? [] : "";
 }
 
-function validateField(field: FormField, value: unknown): string[] {
+function validateField(field: FormFieldSchema, value: unknown): string[] {
   if (field.type === "file") return [];
   if (field.type === "checkbox") {
     return field.required && (!Array.isArray(value) || value.length === 0)
@@ -188,7 +190,7 @@ export function RegistrationEditForm({
     }
   };
 
-  const renderField = (field: FormField): ReactNode => {
+  const renderField = (field: FormFieldSchema): ReactNode => {
     const value = formValues[field.id];
     switch (field.type) {
       case "textarea": {

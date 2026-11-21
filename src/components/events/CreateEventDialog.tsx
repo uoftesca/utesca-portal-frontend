@@ -31,6 +31,7 @@ import {
 import { useCreateEvent } from '@/hooks/use-events';
 import type { CreateEventRequest, EventStatus } from '@/types/event';
 import { convertTorontoTimeToUTC } from '@/lib/timezone';
+import { RegistrationFormDialog } from '@/components/events/RegistrationFormDialog';
 
 // Helper to convert datetime-local to ISO 8601 string
 // The datetime-local input is interpreted as Toronto time
@@ -49,6 +50,7 @@ export function CreateEventDialog() {
     registrationDeadline: '',
     status: 'draft',
     maxCapacity: undefined,
+    registrationFormSchema: undefined,
     imageUrl: '',
     category: '',
     albumLink: '',
@@ -82,6 +84,8 @@ export function CreateEventDialog() {
     }
     if (formData.maxCapacity && formData.maxCapacity > 0)
       cleanedData.maxCapacity = formData.maxCapacity;
+    if (formData.registrationFormSchema)
+      cleanedData.registrationFormSchema = formData.registrationFormSchema;
     if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
     if (formData.category?.trim()) cleanedData.category = formData.category.trim();
     if (formData.albumLink?.trim())
@@ -102,6 +106,7 @@ export function CreateEventDialog() {
         registrationDeadline: '',
         status: 'draft',
         maxCapacity: undefined,
+        registrationFormSchema: undefined,
         imageUrl: '',
         category: '',
         albumLink: '',
@@ -295,6 +300,18 @@ export function CreateEventDialog() {
               />
               <p className="text-xs text-muted-foreground">
                 Raw image URL to featured image
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="registrationForm">Registration Form</Label>
+              <RegistrationFormDialog
+                onFormSave={(newForm) =>
+                  setFormData({ ...formData, registrationFormSchema: newForm })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Internal registration form editor
               </p>
             </div>
 

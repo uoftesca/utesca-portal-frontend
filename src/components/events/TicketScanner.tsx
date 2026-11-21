@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useCheckIn } from '@/hooks/use-registrations';
-import { TicketInfo } from '@/types/registration';
+import type { TicketInfo } from '@/types/registration';
 
 const STOP_COOLDOWN_MS = 500;
 const SCAN_COOLDOWN_MS = 1500;
