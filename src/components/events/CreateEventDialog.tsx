@@ -50,6 +50,7 @@ export function CreateEventDialog() {
     registrationDeadline: '',
     status: 'draft',
     maxCapacity: undefined,
+    registrationFormSchema: undefined,
     imageUrl: '',
     category: '',
     albumLink: '',
@@ -83,6 +84,8 @@ export function CreateEventDialog() {
     }
     if (formData.maxCapacity && formData.maxCapacity > 0)
       cleanedData.maxCapacity = formData.maxCapacity;
+    if (formData.registrationFormSchema)
+      cleanedData.registrationFormSchema = formData.registrationFormSchema;
     if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
     if (formData.category?.trim()) cleanedData.category = formData.category.trim();
     if (formData.albumLink?.trim())
@@ -103,6 +106,7 @@ export function CreateEventDialog() {
         registrationDeadline: '',
         status: 'draft',
         maxCapacity: undefined,
+        registrationFormSchema: undefined,
         imageUrl: '',
         category: '',
         albumLink: '',
