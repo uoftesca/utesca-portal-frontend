@@ -64,7 +64,7 @@ export function FormEditor({
     onFieldsChange(newFields);
   };
 
-  const handleFieldChange = (id: string, key: keyof FormFieldSchema, value: any) => {
+  const handleFieldChange = (id: string, key: keyof FormFieldSchema, value: FormFieldSchema[keyof FormFieldSchema]) => {
     updateFields(
       fields.map((field: FormFieldSchema) => {
         if (field.id === id) {
@@ -97,7 +97,7 @@ export function FormEditor({
     newField.required !== null &&
     newField.editable !== null;
 
-  const handleNewFieldChange = (key: keyof FormFieldSchema, value: any) => {
+  const handleNewFieldChange = (key: keyof FormFieldSchema, value: FormFieldSchema[keyof FormFieldSchema]) => {
     setNewField((prev) => ({ ...prev, [key]: value }));
   };
 
