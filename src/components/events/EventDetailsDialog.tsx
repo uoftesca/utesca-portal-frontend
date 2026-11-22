@@ -36,6 +36,7 @@ import { EventStatusBadge } from './EventStatusBadge';
 import type { UpdateEventRequest, EventStatus } from '@/types/event';
 import type { UserRole } from '@/types/team';
 import { formatInTorontoTime, formatForDateTimeInput, convertTorontoTimeToUTC } from '@/lib/timezone';
+import { RegistrationFormDialog } from './RegistrationFormDialog';
 
 interface EventDetailsDialogProps {
   eventId: string | null;
@@ -65,6 +66,7 @@ const cleanFormData = (formData: UpdateEventRequest): UpdateEventRequest => {
   }
   if (formData.status) cleanedData.status = formData.status;
   if (formData.maxCapacity && formData.maxCapacity > 0) cleanedData.maxCapacity = formData.maxCapacity;
+  if (formData.registrationFormSchema) cleanedData.registrationFormSchema = formData.registrationFormSchema;
   if (formData.imageUrl?.trim()) cleanedData.imageUrl = formData.imageUrl.trim();
   if (formData.category?.trim()) cleanedData.category = formData.category.trim();
   if (formData.albumLink?.trim()) cleanedData.albumLink = formData.albumLink.trim();
@@ -112,6 +114,7 @@ export function EventDetailsDialog({
         registrationDeadline: formatForDateTimeInput(event.registrationDeadline),
         status: event.status,
         maxCapacity: event.maxCapacity || undefined,
+        registrationFormSchema: event.registrationFormSchema || undefined,
         imageUrl: event.imageUrl || '',
         category: event.category || '',
         albumLink: event.albumLink || '',
@@ -359,6 +362,16 @@ export function EventDetailsDialog({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="registrationForm">Registration Form</Label>
+                <RegistrationFormDialog
+                  form={event.registrationFormSchema ?? undefined}
+                  onFormSave={(newForm) =>
+                    setFormData({ ...formData, registrationFormSchema: newForm })
+                  }
+                />
               </div>
 
               <div className="grid gap-2">

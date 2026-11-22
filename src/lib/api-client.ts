@@ -199,6 +199,10 @@ export const apiClient = {
     );
   },
 
+  getDefaultRegistrationForm: async () => {
+    return apiRequest('/events/default-registration-form');
+  },
+
   getEventById: async (eventId: string) => {
     return apiRequest(`/events/${eventId}`);
   },
