@@ -320,9 +320,13 @@ export const apiClient = {
     return { blob: await response.blob(), filename, errorCount };
   },
 
-  notifyConfirmedRegistrants: async (eventId: string): Promise<{ success: boolean; queued: number }> => {
+  notifyConfirmedRegistrants: async (
+    eventId: string,
+    body?: string
+  ): Promise<{ success: boolean; queued: number }> => {
     return apiRequest(`/portal/events/${eventId}/registrations/notify`, {
       method: 'POST',
+      ...(body === undefined ? {} : { body: JSON.stringify({ body }) }),
     });
   },
 
