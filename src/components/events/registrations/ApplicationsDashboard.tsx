@@ -19,6 +19,7 @@ import {
   useDownloadRegistrationFiles,
   useNotifyConfirmedRegistrants,
   useRegistrationAttendanceCounts,
+  REMINDER_CUSTOM_BODY_SUPPORTED,
 } from '@/hooks/use-registrations';
 import { useEvent } from '@/hooks/use-events';
 import { StatusFilterCards } from './StatusFilterCards';
@@ -118,10 +119,11 @@ export function ApplicationsDashboard({
     });
   };
 
-  const handleNotify = () => {
+  // The body is only sent once REMINDER_CUSTOM_BODY_SUPPORTED is enabled.
+  const handleNotify = (emailBody: string) => {
     setReminderFeedback(null);
     notifyMutation.mutate(
-      { eventId },
+      { eventId, body: emailBody },
       {
         onSuccess: ({ queued }) => {
           setReminderDialogOpen(false);
@@ -285,9 +287,12 @@ export function ApplicationsDashboard({
         open={reminderDialogOpen}
         onOpenChange={setReminderDialogOpen}
         eventTitle={event?.title || 'this event'}
+        eventDateTime={event?.dateTime}
+        eventLocation={event?.location}
         confirmedCount={statusCounts?.confirmed || 0}
         onConfirm={handleNotify}
         isPending={notifyMutation.isPending}
+        bodyEditable={REMINDER_CUSTOM_BODY_SUPPORTED}
       />
     </div>
   );

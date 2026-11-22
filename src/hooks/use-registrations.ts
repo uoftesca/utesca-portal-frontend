@@ -240,11 +240,27 @@ export function useDownloadRegistrationFiles() {
 }
 
 /**
+ * Whether POST /portal/events/{eventId}/registrations/notify accepts a custom
+ * `body`. The backend handler (notify_confirmed_registrants) currently takes no
+ * request body, so keep this false until it does; while false the reminder
+ * dialog's body is read-only and is not sent.
+ */
+export const REMINDER_CUSTOM_BODY_SUPPORTED = true; //set to true once backend works
+
+/**
  * Hook to queue reminder emails for all unique confirmed registrants.
  */
 export function useNotifyConfirmedRegistrants() {
-  return useMutation<{ success: boolean; queued: number }, Error, { eventId: string }>({
-    mutationFn: ({ eventId }) => apiClient.notifyConfirmedRegistrants(eventId),
+  return useMutation<
+    { success: boolean; queued: number },
+    Error,
+    { eventId: string; body?: string }
+  >({
+    mutationFn: ({ eventId, body }) =>
+      apiClient.notifyConfirmedRegistrants(
+        eventId,
+        REMINDER_CUSTOM_BODY_SUPPORTED ? body : undefined
+      ),
   });
 }
 
